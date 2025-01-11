@@ -1,0 +1,96 @@
+{
+  "name": "generator-protheus-container",
+  "version": "0.0.1",
+  "description": "Container Protheus Generator for Yeoman.",
+  "author": {
+    "name": "Alan Candido",
+    "email": "brodao@gmail.com",
+    "url": "https://github.com/brodao2"
+  },
+  "license": "Apache-2.0",
+  "repository": "brodao2/protheus-container-generator",
+  "files": [
+    "generators"
+  ],
+  "main": "generators/index.js",
+  "keywords": [
+    "protheus",
+    "protheus-development",
+    "yeoman-generator"
+  ],
+  "devDependencies": {
+    "@types/yeoman-generator": "^5.2.14",
+    "@types/yosay": "^2.0.3",
+    "coveralls": "^3.0.7",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.6.0",
+    "eslint-config-xo": "^0.27.2",
+    "eslint-plugin-prettier": "^3.1.1",
+    "husky": "^3.0.9",
+    "jest": "^26.1.0",
+    "lint-staged": "^9.4.3",
+    "prettier": "^1.19.1",
+    "yeoman-assert": "^3.1.1",
+    "yeoman-test": "^1.7.0"
+  },
+  "engines": {
+    "npm": ">= 4.0.0"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.2.1",
+    "adm-zip": "^0.5.16",
+    "chalk": "^2.1.0",
+    "download": "^8.0.0",
+    "fs-extra": "^11.2.0",
+    "tar": "^7.4.3",
+    "wget-improved": "^3.4.0",
+    "yeoman-generator": "^3.1.1",
+    "yosay": "^2.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.json": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "xo",
+      "prettier"
+    ],
+    "env": {
+      "jest": true,
+      "node": true
+    },
+    "rules": {
+      "prettier/prettier": "error"
+    },
+    "plugins": [
+      "prettier"
+    ]
+  },
+  "scripts": {
+    "--COMPILE--": "",
+    "compile": "tsc",
+    "--RUN--": "",
+    "run": "yo protheus-container",
+    "run1": "yo protheus-container --skip-prompts --skip-banner --user acandido",
+    "help": "yo protheus-container --help",
+    "debug": "npx --node-options=\"--inspect\" yo protheus-container",
+    "--TEST--": "",
+    "pretest": "eslint .",
+    "test": "jest"
+  }
+}

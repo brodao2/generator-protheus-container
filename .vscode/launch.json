@@ -1,0 +1,28 @@
+{
+  "configurations": [
+    {
+      "name": "Launch via NPM",
+      "request": "launch",
+      "runtimeArgs": [
+        "protheus-container"
+      ],
+      "runtimeExecutable": "yo",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run YOGenerator",
+      "runtimeExecutable": "yo",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--node-options=\"--inspect\"",
+        "yo",
+        "protheus-container"
+      ],
+    },
+  ]
+}
