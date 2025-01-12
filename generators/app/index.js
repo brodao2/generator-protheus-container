@@ -7,7 +7,6 @@ const path = require('path');
 const config = require('./config');
 const smallBanner = require("./small-banner");
 const featuresChoices = require("./features");
-const internal = require("stream");
 
 module.exports = class extends Generator {
   constructor(args, opts) {
@@ -19,9 +18,11 @@ module.exports = class extends Generator {
     }
   }
 
-  // initializing() {
-  //   this.log("initializing");
-  // }
+  initializing() {
+    this.log("initializing");
+
+    // This.fs.delete(this.destinationPath("_images"));
+  }
 
   async prompting() {
     let answers = {}
@@ -55,7 +56,7 @@ ${chalk.bold("Let's start!")}
               name: "user",
               message: "User (arte.engpro.totvs.com.br)?",
               default: this.options.user || "",
-              //store: true
+              // Store: true
             },
             {
               type: "password",
@@ -63,7 +64,7 @@ ${chalk.bold("Let's start!")}
               message: "Password",
               mask: "*",
               default: this.options.password || "",
-              //store: true
+              // Store: true
             },
           ])
         };
@@ -199,7 +200,7 @@ ${chalk.bold("Let's start!")}
     this.props = answers;
   }
 
-  // configuring() {
+  // Configuring() {
   //   //nothing to do
   // }
 
@@ -207,7 +208,7 @@ ${chalk.bold("Let's start!")}
   //   //nothing to do
   // }
 
-  async writing() {
+  writing() {
     this.log("writing start");
 
     let downloadList = [];
@@ -215,6 +216,12 @@ ${chalk.bold("Let's start!")}
     let zipList = [];
     let copyList = [];
     const varList = {};
+    const outputFile = (this.props.containerManager === "podman") ?
+      "Containerfile" : "Dockerfile";
+    let secondaries = [];
+    for (let index = 0; index < this.props.brokerSecondary; index++) {
+      secondaries.push(index + 1);
+    }
 
     for (const feature of this.props.features) {
       this.log.info(`Select to downloading (${this.props.features.indexOf(feature) + 1}/${this.props.features.length}) ${feature}...`);
@@ -254,16 +261,18 @@ ${chalk.bold("Let's start!")}
       internal: false,
     });
 
-    if (this.props.brokerEnabled) {
-      //gerar ini broker e secundarios
+    // Init dbacess
 
-      for (let index = 0; index <= this.props.brokerSecondary; index++) {
+    // gerar ini appServer,broker e secundarios
+
+    if (this.props.brokerEnabled) {
+      secondaries.forEach((sequence) => {
         copyList.push({
           source: "/totvs/bin/protheus/appserver",
-          target: `/totvs/bin/protheus/appserver-${index}/+1`,
+          target: `/totvs/bin/protheus/appserver-${sequence}`,
           internal: true,
         });
-      }
+      });
     }
 
     this.props.features.forEach(feature => {
@@ -287,15 +296,8 @@ ${chalk.bold("Let's start!")}
       this.props.dbAccessPort,
     ].sort((a, b) => a < b ? -1 : 0).join(" ");
 
-    const outputFile = (this.props.containerManager === "podman") ?
-      "Containerfile" : "Dockerfile";
-    let secondaries = [];
-    for (let index = 0; index < this.props.brokerSecondary; index++) {
-      secondaries.push(index + 1);
-    }
-
     if (this.props.brokerEnabled) {
-      // gerar ini appserver
+      // Gerar ini appserver
       secondaries.forEach((sequence) => {
         this.fs.copyTpl(
           this.templatePath("appserver", "appserver-daemon.sh.txt"),
@@ -319,6 +321,7 @@ ${chalk.bold("Let's start!")}
       { debug: false }
     );
 
+    // Adicionar start dbacess
     this.fs.copyTpl(
       this.templatePath("appserver", "appserver-start.sh.txt"),
       this.destinationPath("_images", "appserver", "appserver-start.sh"),
@@ -326,14 +329,14 @@ ${chalk.bold("Let's start!")}
         secondaries: secondaries,
         ...varList
       },
-      { debug: true }
+      { debug: false }
     );
 
     this.fs.copyTpl(
       this.templatePath("appserver", "dockerfile.appserver.txt"),
       this.destinationPath("_images", "appserver", outputFile),
       varList,
-      { debug: true }
+      { debug: false }
     );
 
     if (this.props.sgdb === "mssql") {
@@ -370,20 +373,33 @@ ${chalk.bold("Let's start!")}
       varList,
       { debug: false }
     );
+
+    this.fs.copyTpl(
+      this.templatePath("start-container.bat.txt"),
+      this.destinationPath("_images", "start-container.bat"),
+      varList,
+      { debug: false }
+    );
+
+    // Mover banco de dados para o container sgdb
+    // restaurar  banco de dados
+
+    // rodar configuração do dbacess
+
   }
 
   conflicts() {
     this.log("conflicts");
   }
 
-  // install() {
+  // Install() {
   //   this.log("install");
   //   this.installDependencies();
   // }
 
   end() {
     const colorConsole = (text) => {
-      //return chalk.bgBlack(chalk.white(text));
+      // Return chalk.bgBlack(chalk.white(text));
       return chalk.bgCyan(chalk.white(text).concat('_'.repeat(60)).substring(0, 60));
     };
 

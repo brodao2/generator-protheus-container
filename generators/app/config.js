@@ -28,7 +28,9 @@ module.exports = {
           name: "selectOption",
           choices: [
             {
-              name: `Fully featured in last versions of ${chalk.bold("Panthera Onça")}`,
+              name: `Fully featured in last versions of ${chalk.bold(
+                "Panthera Onça"
+              )}`,
               value: "fully-featured",
               description:
                 "All components based on Panthera Onça, in their last versions and Linux/x64."
@@ -88,7 +90,6 @@ module.exports = {
       ];
     },
     broker: () => {
-
       return [
         {
           type: "number",
@@ -137,7 +138,7 @@ module.exports = {
           type: "input",
           name: "user",
           message: "User (arte.engpro.totvs.com.br)?",
-          default: "", //this.options.user ||
+          default: "", // This.options.user ||
           store: true
         },
         {
@@ -145,7 +146,7 @@ module.exports = {
           name: "password",
           message: "Password",
           mask: "*",
-          default: "", //this.options.password || "",
+          default: "", // This.options.password || "",
           store: true
         }
       ];
@@ -188,7 +189,8 @@ module.exports = {
             type: "url",
             name: "sgdbAddress",
             message: "Enter Address",
-            default: "127.0.0.1:" + (sgdb.startsWith("mssql") ? "1433" : "5432"),
+            default:
+              "127.0.0.1:" + (sgdb.startsWith("mssql") ? "1433" : "5432"),
             store: true
           }
         ];
@@ -236,7 +238,7 @@ module.exports = {
           type: "input",
           name: "containerName",
           message: "Container Name",
-          default: "my-machine",
+          default: "my-container",
           store: true
         }
       ];
