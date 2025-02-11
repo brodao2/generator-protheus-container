@@ -8,6 +8,8 @@ const config = require('./config');
 const smallBanner = require("./small-banner");
 const featuresChoices = require("./features");
 
+const DEBUG_COPY_TPL = false;
+
 module.exports = class extends Generator {
   constructor(args, opts) {
     super(args, opts);
@@ -21,7 +23,7 @@ module.exports = class extends Generator {
   initializing() {
     this.log("initializing");
 
-    // This.fs.delete(this.destinationPath("_images"));
+    this.fs.delete(this.destinationPath("_images", "*.*"));
   }
 
   async prompting() {
@@ -141,7 +143,7 @@ ${chalk.bold("Let's start!")}
       }
 
       if (answers.features.filter(selection => selection.startsWith("protheus")).length > 0) {
-        this.log(`${chalk.bold("Protheus configuration")}`);
+        this.log(`${chalk.bold("Protheus Configuration")}`);
         answers = {
           ...answers,
           ...await this.prompt(config.prompts.protheus())
@@ -156,7 +158,7 @@ ${chalk.bold("Let's start!")}
       }
 
       if (answers.features.filter(selection => selection.startsWith("webapp")).length > 0) {
-        this.log(`${chalk.bold("WebApp configuration")}`);
+        this.log(`${chalk.bold("WebApp Configuration")}`);
         answers = {
           ...answers,
           ...await this.prompt(config.prompts.webApp())
@@ -164,7 +166,7 @@ ${chalk.bold("Let's start!")}
       }
 
       if (answers.features.filter(selection => selection.startsWith("dbaccess")).length > 0) {
-        this.log(`${chalk.bold("DBAccess configuration")}`);
+        this.log(`${chalk.bold("DBAccess Configuration")}`);
 
         answers = {
           ...answers,
@@ -190,7 +192,7 @@ ${chalk.bold("Let's start!")}
       };
     }
 
-    this.log(`${chalk.bold("Container configuration")}`);
+    this.log(`${chalk.bold("Container Configuration")}`);
     answers = {
       ...answers,
       ...await this.prompt(config.prompts.container())
@@ -261,9 +263,7 @@ ${chalk.bold("Let's start!")}
       internal: false,
     });
 
-    // Init dbacess
-
-    // gerar ini appServer,broker e secundarios
+    // Gerar ini appServer,broker e secundarios
 
     if (this.props.brokerEnabled) {
       secondaries.forEach((sequence) => {
@@ -290,6 +290,9 @@ ${chalk.bold("Let's start!")}
     varList.containerManager = this.props.containerManager;
     varList.containerName = this.props.containerName;
     varList.sgdb = this.props.sgdb;
+    varList.dbUser = this.props.dbUser;
+    varList.dbPassword = this.props.dbPassword;
+    varList.licenseServer = this.props.licenseServer;
     varList.exposePorts = [
       this.props.webappPort,
       this.props.protheusPort,
@@ -306,7 +309,7 @@ ${chalk.bold("Let's start!")}
             appSequence: `-${sequence}`,
             ...varList
           },
-          { debug: false }
+          { debug: DEBUG_COPY_TPL }
         );
       });
     }
@@ -318,10 +321,19 @@ ${chalk.bold("Let's start!")}
         appSequence: "",
         ...varList
       },
-      { debug: false }
+      { debug: DEBUG_COPY_TPL }
     );
 
-    // Adicionar start dbacess
+    this.fs.copyTpl(
+      this.templatePath("dbaccess", "dbaccess-daemon.sh.txt"),
+      this.destinationPath("_images", "dbaccess", "etc", "init.d", "dbaccess.sh"),
+      {
+        appSequence: "",
+        ...varList
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
+
     this.fs.copyTpl(
       this.templatePath("appserver", "appserver-start.sh.txt"),
       this.destinationPath("_images", "appserver", "appserver-start.sh"),
@@ -329,14 +341,14 @@ ${chalk.bold("Let's start!")}
         secondaries: secondaries,
         ...varList
       },
-      { debug: false }
+      { debug: DEBUG_COPY_TPL }
     );
 
     this.fs.copyTpl(
       this.templatePath("appserver", "dockerfile.appserver.txt"),
       this.destinationPath("_images", "appserver", outputFile),
       varList,
-      { debug: false }
+      { debug: DEBUG_COPY_TPL }
     );
 
     if (this.props.sgdb === "mssql") {
@@ -344,21 +356,28 @@ ${chalk.bold("Let's start!")}
         this.templatePath("mssql", "dockerfile.mssql.txt"),
         this.destinationPath("_images", "mssql", outputFile),
         varList,
-        { debug: false }
+        { debug: DEBUG_COPY_TPL }
       );
+      this.fs.copyTpl(
+        this.templatePath("mssql", "odbc.ini.txt"),
+        this.destinationPath("_images", "etc", "odbc.ini"),
+        varList,
+        { debug: DEBUG_COPY_TPL }
+      );
+
     } else if (this.props.sgdb === "postgresql") {
       this.fs.copyTpl(
         this.templatePath("postgresql", "dockerfile.postgresql.txt"),
         this.destinationPath("_images", "postgresql", outputFile),
         varList,
-        { debug: false }
+        { debug: DEBUG_COPY_TPL }
       );
 
       this.fs.copyTpl(
         this.templatePath("postgresql", "docker-ensure-initdb.sh"),
         this.destinationPath("_images/postgresql", "docker-ensure-initdb.sh"),
         varList,
-        { debug: false }
+        { debug: DEBUG_COPY_TPL }
       );
 
       this.fs.copyTpl(
@@ -371,20 +390,20 @@ ${chalk.bold("Let's start!")}
       this.templatePath("build-container.bat.txt"),
       this.destinationPath("_images", "build-container.bat"),
       varList,
-      { debug: false }
+      { debug: DEBUG_COPY_TPL }
     );
 
     this.fs.copyTpl(
       this.templatePath("start-container.bat.txt"),
       this.destinationPath("_images", "start-container.bat"),
       varList,
-      { debug: false }
+      { debug: DEBUG_COPY_TPL }
     );
 
     // Mover banco de dados para o container sgdb
     // restaurar  banco de dados
 
-    // rodar configuração do dbacess
+    // rodar configuração do dbaccess
 
   }
 

@@ -164,12 +164,12 @@ module.exports = {
               value: "mssql"
             },
             {
-              name: "PostgreSQL (Container)",
-              value: "postgresql"
-            },
-            {
               name: "MS-SQL (External)",
               value: "mssql-external"
+            },
+            {
+              name: "PostgreSQL (Container)",
+              value: "postgresql"
             },
             {
               name: "PostgreSQL (External)",

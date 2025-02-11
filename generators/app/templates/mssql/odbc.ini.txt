@@ -1,0 +1,8 @@
+
+[ProtheusDB]
+DRIVER=/usr/lib64/psqlodbcw.so
+SERVERNAME=<%- containerName %>-<%- sgdb %>"
+PORT=4050
+DATABASE=protheus
+USERNAME=<%- dbUser %>
+PASSWORD==<%- dbPassword %>

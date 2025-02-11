@@ -5,7 +5,7 @@
 # CAUTION: Manual editions can be overwritten
 # =======================================================
 
-# Este script é usado para gerenciar serviços do Protheus, permitindo
+# Este script é usado para gerenciar serviços do DbAccess, permitindo
 # iniciar, parar, reiniciar, matar, verificar o status, exibir informações detalhadas,
 # exportar logs e configurações, e monitorar logs em tempo real.
 # Use as opções start, stop, kill, restart, status, describe, export, ou log para realizar
@@ -15,19 +15,31 @@
 #   CONFIGURACAO DO SERVICO
 #########################################
 #Inserir o nome do executavel
-prog="appsrvlinux"
+prog="dbaccess64"
 
 #Inserir o caminho do diretorio do executavel
-pathbin="/totvs/bin/protheus/appserver<%- appSequence %>"
+pathbin="/totvs/bin/dbaccess/multi"
 
-alias=$(basename "${pathbin}")
+alias=$(basename $(dirname ${pathbin}))
 
 progbin="${pathbin}/${prog}"
 pidfile="/var/run/${alias}.pid"
 lockfile="/var/lock/subsys/${alias}"
 
-config_filename=appserver.ini
-log_filename=console.log
+config_filename=dbaccess.ini
+log_filename=dbconsole.log
+
+#################################################################
+#AMBIENTE COM DB ORACLE
+#################################################################
+#Variavel EnvOracle define se deve exportar as variaveis do ORACLE
+#       1 - Habilitado | 0 - Desabilitado
+#################################################################
+envOracle=0
+#################################################################
+oracle_sid="orcl"
+oracle_home="/usr/lib/oracle/19.10/client64"
+tns_admin="/usr/lib/oracle/19.10/client64/lib/network/admin/"
 
 #################################################################
 # Configurações de limites
@@ -50,7 +62,23 @@ red="\033[31m"
 green='\033[32m'
 reset='\033[m'
 
-#################################################################
+###################################################################
+# Exporta as variaveis de ambiente do Oracle
+###################################################################
+exportOracle() {
+    if [ ${envOracle} -eq 1 ]
+    then
+        export ORACLE_SID=${oracle_sid}
+        export ORACLE_HOME=${oracle_home}
+        export TNS_ADMIN=${tns_admin}
+        export CLASSPATH=$ORACLE_HOME/JRE:$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib:$ORACLE_HOME/network/jlib
+        export LD_LIBRARY_PATH=$ORACLE_HOME:/lib:/usr/lib:/usr/local/lib:${pathbin}
+        export PATH=$ORACLE_HOME:$PATH
+        echo -e "Exported ORACLE environment variables..."
+    fi
+}
+
+##################################################################
 
 RETVAL=0
 
@@ -62,7 +90,6 @@ test -x $progbin || {
   if [ "$1" = "stop" ]; then
     exit 0
   else exit 5; fi
-}
 
 #################################################################
 ## Aplica configurações do serviço
@@ -86,80 +113,82 @@ export LD_LIBRARY_PATH=${pathbin}
 ## Start_service: inicia o serviço
 #################################################################
 start_service() {
-
-  if [ -z $(pidof -x $progbin) ]; then
-    echo "Starting $prog... "
+exportOracle
+if [ -z `pidof -x $progbin` ] ; then
+   echo "Starting $prog... "
     ${progbin} -daemon >/dev/null &
-    RETVAL=$?
-    if [ ${RETVAL} -eq 0 ]; then
+   RETVAL=$?
+   if [ ${RETVAL} -eq 0 ]; then
       touch ${lockfile}
       touch ${pidfile}
-      pidof -x ${progbin} >${pidfile}
+      pidof -x ${progbin} > ${pidfile}
       sleep 1
-      echo "PID : " $(cat ${pidfile})
+      echo "PID : " `cat ${pidfile}`
       echo -e "${prog} running :   ${green}[ OK ]${reset}"
-    else
+   else
       echo -e "Failed to start ${prog} :         ${red}[ Failure ]${reset}"
-    fi
-    echo
-  else
-    echo -e "$prog is ${green}Started${reset} pid $(pidof -x $progbin)"
-  fi
+   fi
+   echo
+else
+   echo -e "$prog is ${green}Started${reset} pid `pidof -x $progbin`"
+fi
 }
 
 #################################################################
 ## Stop_service: encerra o serviço
 #################################################################
 stop_service() {
-  if [ ! -z $(pidof -x ${progbin}) ]; then
+if [ ! -z `pidof -x ${progbin}` ] ; then
 
-    kill -s SIGTERM $(pidof -x ${progbin})
+   kill -s SIGTERM $(pidof -x ${progbin})
 
-    echo
-    rm -f $lockfile
-    rm -f $pidfile
-    echo -n "Stopping ${prog}."
-    while [ ! -z $(pidof -x ${progbin}) ]; do
-      echo -n "."
-      sleep 1
-    done
-    echo
-    echo -e "${prog} is Stopped     ${red}[ Stopped ]${reset}"
-  else
-    echo -e "${prog} is not running ${red}[ Stopped ]${reset}"
-  fi
+   echo
+   rm -f $lockfile
+   rm -f $pidfile
+   echo -n "Stopping ${prog}."
+   while [ ! -z `pidof -x ${progbin}` ]
+   do
+        echo -n "."
+        sleep 1
+   done
+   echo
+   echo -e "${prog} is Stopped     ${red}[ Stopped ]${reset}"
+else
+   echo -e "${prog} is not running ${red}[ Stopped ]${reset}"
+fi
 }
 
 #################################################################
 ## Kill_service: interrompe o serviço
 #################################################################
 kill_service() {
-  if [ ! -z $(pidof -x ${progbin}) ]; then
+if [ ! -z `pidof -x ${progbin}` ] ; then
 
-    kill -s SIGKILL $(pidof -x ${progbin})
+   kill -s SIGKILL $(pidof -x ${progbin})
 
-    echo
-    rm -f $lockfile
-    rm -f $pidfile
-    echo -n "Stopping ${prog}."
-    while [ ! -z $(pidof -x ${progbin}) ]; do
-      echo -n "."
-      sleep 1
-    done
-    echo
-    echo -e "${prog} is Killed     ${red}[ Killed ]${reset}"
-  else
-    echo -e "${prog} is not running ${red}[ Stopped ]${reset}"
-  fi
+   echo
+   rm -f $lockfile
+   rm -f $pidfile
+   echo -n "Stopping ${prog}."
+   while [ ! -z `pidof -x ${progbin}` ]
+   do
+        echo -n "."
+        sleep 1
+   done
+   echo
+   echo -e "${prog} is Killed     ${red}[ Killed ]${reset}"
+else
+   echo -e "${prog} is not running ${red}[ Stopped ]${reset}"
+fi
 }
 
 #################################################################
 ## get_stats: coleta os dados do serviço e exporta no contexto atual.
 #################################################################
 get_stats() {
-  date
-  echo
-  if [ ! -z $(pidof -x ${progbin}) ]; then
+date
+echo
+if [ ! -z `pidof -x ${progbin}` ] ; then
     export pid=$(pidof -x ${progbin})
 
     export progport=$(lsof -Pp ${pid} | grep '(LISTEN)' | awk '{ print $9}' | cut -d: -f2 | xargs | tr ' ' ',')
@@ -175,56 +204,54 @@ get_stats() {
     export nlwp=$(echo -e $list | awk '{ print $8 }')
     export comm=$(echo -e $list | awk '{ print $9 }')
 
-    export size=$(echo -e "$(bc <<<"scale=2;$size/1024")MB")
-  else
+    export size=$(echo -e "$(bc <<< "scale=2;$size/1024")MB")
+else
     echo -e "Status process: ${red} [ Stopped ] ${reset} "
     echo -e "${red}- Program $prog is not running! ${reset}"
-  fi
+fi
 }
 
 #################################################################
 ## Status: exibe o estado atual do serviço em formato de tabela.
 #################################################################
 status() {
-  get_stats
+get_stats
 
-  output=$(
-    cat <<EOF
+output=$(cat << EOF
 ALIAS PROCESS PORT PID CPU_TIME %CPU %MEM MEMORY THREADS STATUS PATH
 ${alias} ${comm} ${progport} ${pid} ${cputime} ${pcpu} ${pmem} ${size} ${nlwp} ${green}[running]${reset} ${progbin}
 EOF
-  )
+)
 
-  echo -e "$output" | column -t
+echo -e "$output" | column -t
 }
 
 #################################################################
 ## get_log: recupera arquivo de ocorrências (log) do serviço.
 #################################################################
 get_log() {
-  consolelog=$(grep -i '^\s*consolefile\s*=' "${pathbin}/${config_filename}" | awk -F= '{print $2}' | tr -d ' ')
-  if [ ! -n "$consolelog" ]; then
-    if [ -n "${pathbin}/${log_filename}" ]; then
-      consolelog="${pathbin}/${log_filename}"
-    else
-      echo '${red}Logfile not found!${reset} : "${pathbin}/${log_filename}"'
-      echo 'Config File: ${pathbin}/${config_filename}'
-      echo 'Add parameter: consolefile=${pathbin}/${log_filename}'
+    consolelog=$(grep -i '^\s*consolefile\s*=' "${pathbin}/${config_filename}" | awk -F= '{print $2}' | tr -d ' ')
+    if [ ! -n "$consolelog" ]; then
+        if [ -n "${pathbin}/${log_filename}" ]; then
+            consolelog="${pathbin}/${log_filename}"
+        else
+            echo '${red}Logfile not found!${reset} : "${pathbin}/${log_filename}"'
+            echo 'Config File: ${pathbin}/${config_filename}'
+            echo 'Add parameter: consolefile=${pathbin}/${log_filename}'
+        fi
     fi
-  fi
-  echo ${consolelog}
+    echo ${consolelog}
 }
 
 #################################################################
 ## Describe: exibe as configurações do ambiente
 #################################################################
 describe() {
-  get_stats
+get_stats
 
-  ## Exibe o status atual do serviço caso ele esteja em execução.
-  if [ ! -z $(pidof -x ${progbin}) ]; then
-    output=$(
-      cat <<EOF
+## Exibe o status atual do serviço caso ele esteja em execução.
+if [ ! -z `pidof -x ${progbin}` ] ; then
+    output=$(cat << EOF
 AlIAS ${alias}
 PROCESS ${comm}
 PATH ${progbin}
@@ -238,42 +265,44 @@ MEMORY ${size}
 STATUS [Running]
 THREADS ${nlwp}
 EOF
-    )
-    echo -e "$output" | column -t
-    echo
-  fi
+)
+echo -e "$output" | column -t
+echo
+fi
 
-  ## Exibe as bibliotecas utilizadas pelo serviço.
-  echo "### LIBRARY ####"
-  ldd ${progbin}
-  echo ""
+## Exibe as bibliotecas utilizadas pelo serviço.
+echo "### LIBRARY ####"
+ldd ${progbin}
+echo ""
 
-  ## Exibe o appserver.ini completo quando localizado.
-  echo "### INI ###"
-  if [ -n "${pathbin}/appserver.ini" ]; then
+## Exibe o appserver.ini completo quando localizado.
+echo "### INI ###"
+if [ -n "${pathbin}/${config_filename}" ]; then
     echo ""
-    echo -e "appserver.ini : ${green} ${pathbin}/appserver.ini ${reset}"
+    echo -e "${config_filename} : ${green} ${pathbin}/${config_filename} ${reset}"
     echo ""
-    cat ${pathbin}/appserver.ini
-  else
+    cat ${pathbin}/${config_filename}
+else
     echo "O appserver não foi localizado."
-  fi
-  echo ""
+fi
+echo ""
 
-  ## Exibe as 15 primeiras linhas e as 15 ultimas linhas do logfile.
-  echo "### LOGFILE ###"
-  consolelog=$(get_log)
+## Exibe as 15 primeiras linhas e as 15 ultimas linhas do logfile.
+echo "### LOGFILE ###"
 
-  if [ -n "$consolelog" ]; then
+consolelog=$(get_log)
+
+if [ -n "${consolelog}" ]; then
     echo ""
-    echo -e "console.log : ${green} ${consolelog} ${reset}"
+    echo -e "${log_filename} : ${green} ${consolelog} ${reset}"
     echo ""
-    head -n 15 "$consolelog"
+    head -n 15 "${consolelog}"
     echo ...
-    tail -n 15 "$consolelog"
-  else
-    echo "Chave 'consolefile' não encontrada no arquivo ${pathbin}/appserver.ini."
-  fi
+    tail -n 15 "${consolelog}"
+else
+
+    echo "Chave 'consolefile' não encontrada no arquivo ${pathbin}/${config_filename}."
+fi
 
 }
 
@@ -281,18 +310,19 @@ EOF
 ## Tail_log: Executa o comando tail -f no arquivo de log do serviço.
 #################################################################
 tail_log() {
-  consolelog=$(get_log)
 
-  if [ -n "$consolelog" ]; then
+consolelog=$(get_log)
+
+if [ -n "${consolelog}" ]; then
     echo ""
-    echo -e "console.log : ${green}$consolelog${reset}"
+    echo -e "${log_filename} : ${green}${consolelog}${reset}"
     echo ""
-    head -n 15 "$consolelog"
+    head -n 15 "${consolelog}"
     echo ...
-    tail -f -n 15 "$consolelog"
-  else
-    echo "Chave 'consolefile' não encontrada no arquivo ${pathbin}/appserver.ini."
-  fi
+    tail -f -n 15 "${consolelog}"
+else
+    echo "Chave 'consolefile' não encontrada no arquivo ${pathbin}/${config_filename}."
+fi
 }
 
 #################################################################
@@ -300,33 +330,33 @@ tail_log() {
 #################################################################
 export_service() {
 
-  describe >/tmp/${SCRIPT_NAME}_describe.txt
+describe > /tmp/${SCRIPT_NAME}_describe.txt
 
-  ldd -v ${progbin} >/tmp/${SCRIPT_NAME}_library.txt
+ldd -v ${progbin} > /tmp/${SCRIPT_NAME}_library.txt
 
-  consolelog=$(get_log)
-  if [ -n "$consolelog" ]; then
+consolelog=$(get_log)
+if [ -n "$consolelog" ]; then
     cp -p $consolelog /tmp/${SCRIPT_NAME}_console.log
-  else
-    echo "Chave 'consolefile' não encontrada no arquivo ${pathbin}/appserver.ini."
-  fi
+else
+    echo "Chave 'consolefile' não encontrada no arquivo ${pathbin}/${config_filename}."
+fi
 
-  if [ -n "${pathbin}/appserver.ini" ]; then
-    cp -p ${pathbin}/appserver.ini /tmp/${SCRIPT_NAME}_appserver.ini
-  else
+if [ -n "${pathbin}/${config_filename}" ]; then
+    cp -p ${pathbin}/${config_filename} /tmp/${SCRIPT_NAME}_${config_filename}
+else
     echo "O appserver não foi localizado."
-  fi
+fi
 
-  zip_file="/tmp/${SCRIPT_NAME}_export.zip"
-  cd /tmp
-  zip -r "$zip_file" "${SCRIPT_NAME}_describe.txt" "${SCRIPT_NAME}_console.log" "${SCRIPT_NAME}_appserver.ini" "${SCRIPT_NAME}_library.txt"
+zip_file="/tmp/${SCRIPT_NAME}_export.zip"
+cd /tmp
+zip -r "$zip_file" "${SCRIPT_NAME}_describe.txt" "${SCRIPT_NAME}_console.log" "${SCRIPT_NAME}_${config_filename}" "${SCRIPT_NAME}_library.txt"
 
-  if [ -f "$zip_file" ]; then
-    echo -e "Pacote criado com sucesso: ${green} $zip_file ${reset}"
-  else
+if [ -f "$zip_file" ]; then
+    echo -e "Pacote criado com sucesso: ${green} ${zip_file} ${reset}"
+else
     echo -e "${red}$ Erro ao criar o pacote .zip ${reset}"
-  fi
-  rm -f /tmp/${SCRIPT_NAME}_describe.txt /tmp/${SCRIPT_NAME}_console.log /tmp/${SCRIPT_NAME}_appserver.ini /tmp/${SCRIPT_NAME}_library.txt
+fi
+rm -f /tmp/${SCRIPT_NAME}_describe.txt /tmp/${SCRIPT_NAME}_console.log /tmp/${SCRIPT_NAME}_${config_filename} /tmp/${SCRIPT_NAME}_library.txt
 
 }
 
@@ -336,7 +366,7 @@ SCRIPT_NAME=$(basename "$0")
 ## Show_help: Mensagem de ajuda
 #################################################################
 show_help() {
-  cat <<EOF
+    cat << EOF
 Usage: ${SCRIPT_NAME} {start|stop|kill|restart|status|describe|export|log}
 
 Gerenciamento de serviços permite iniciar, parar, reiniciar, matar, verificar o status, exibir informações.
@@ -358,45 +388,45 @@ EOF
 #################################################################
 # MAIN
 #################################################################
+
 case "$1" in
 start)
-  start_service 2>/dev/null
-  ;;
+    start_service 2>/dev/null
+    ;;
 stop)
-  stop_service
-  ;;
+    stop_service
+    ;;
 kill)
-  kill_service
-  ;;
+    kill_service
+    ;;
 restart)
-  stop_service
-  sleep 1
-  start_service 2>/dev/null
-  sleep 1
-  status
-  exit $?
-  ;;
-status)
-  if [ ! -z $(pidof -x $progbin) ]; then
+    stop_service
+    sleep 1
+    start_service 2>/dev/null
+    sleep 1
     status
-  else
-    echo -e "Status process: ${red} [ Stoppe ] ${reset} "
-    echo -e "${red}- Program $prog is not running! ${reset}"
-  fi
-  ;;
+    exit $?
+    ;;
+status)
+    if [ ! -z `pidof -x $progbin` ] ; then
+       status
+    else
+        echo -e "Status process: ${red} [ Stoppe ] ${reset} "
+        echo -e "${red}- Program $prog is not running! ${reset}"
+    fi
+    ;;
 describe)
-  describe
-  ;;
+    describe
+    ;;
 log)
-  tail_log
-  ;;
+    tail_log
+    ;;
 export)
-  export_service
-  ;;
+    export_service
+    ;;
 *)
-  show_help
-  exit 1
-  ;;
+    show_help
+    exit 1
 esac
 
 exit 0

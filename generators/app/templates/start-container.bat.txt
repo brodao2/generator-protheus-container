@@ -5,8 +5,8 @@ echo # =======================================================
 
 <%= containerManager %> network create protheus-net --log-level=DEBUG
 
-<%= containerManager %> run -it --name <%- sgdb %> --network protheus-net --log-level=DEBUG -d "<%- containerName %>-<%- sgdb %>"
+<%= containerManager %> run -rmi -it --name <%- sgdb %> --network protheus-net --log-level=DEBUG -d "<%- containerName %>-<%- sgdb %>"
 
-<%= containerManager %> run -it --name appserver --network protheus-net  --log-level=DEBUG -d "<%- containerName %>-appserver" /bin/sh
+<%= containerManager %> run -rmi -it --name appserver --network protheus-net  --log-level=DEBUG -d "<%- containerName %>-appserver" /bin/sh
 
 <%= containerManager %> network inspect protheus-net
