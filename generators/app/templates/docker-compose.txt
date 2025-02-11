@@ -1,0 +1,8 @@
+version: '3'
+services:
+  sgdb:
+    image: <%- containerName %>-<%- sgdb %>
+  appServer:
+    image: <%- containerName %>--appserver
+    depends_on:
+      - sgdb

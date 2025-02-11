@@ -1,0 +1,62 @@
+@echo off
+set title=HELP
+
+if "%1" == "build" set title=BUILD
+if "%1" == "start" set title=START
+if "%1" == "stop" set title=STOP
+
+<%= include("banner.bat.txt", { appVersion: appVersion, title: "%1%"}) %>
+
+if "%1" == "build" goto :build
+if "%1" == "start" goto :start
+if "%1" == "stop" goto :stop
+if "%1" == "help" goto :help
+
+echo ERROR: Invalid command
+goto :help
+
+:build
+
+podman pod exists <%- containerName %>-pod
+if %errorlevel% == 0 goto :alreadyExists
+
+podman build -t "<%- containerName %>-mssql" ./mssql
+podman build -t "<%- containerName %>-appserver" --no-cache --log-level=DEBUG ./appserver
+
+podman pod create <%- containerName %>-pod
+podman run -it --pod <%- containerName %>-pod --name mssql --log-level=DEBUG -d "<%- containerName %>-mssql"
+podman run -it --pod <%- containerName %>-pod --name appserver   --log-level=DEBUG -d "<%- containerName %>-appserver" /bin/sh
+podman pod stop <%- containerName %>-pod
+
+goto :end
+
+:start
+podman pod start <%- containerName %>-pod
+
+goto :end
+
+:stop
+podman pod stop <%- containerName %>-pod
+
+goto :end
+
+:alreadyExists
+<%= include("error.bat.txt", { message: "Pod already exists. Name: " + containerName }) %>
+
+goto :help
+
+:help
+echo   Usage: container build ^| start ^| stop ^| help [-p]
+echo     build - creates the container
+echo     start - start the container
+echo     stop - stop the container
+echo     help - show this text
+echo     -p - take a pause to finish
+
+goto :end2
+
+:end
+<%= include("tail.bat.txt") %>
+
+:end2
+if "%2" == "-p" pause

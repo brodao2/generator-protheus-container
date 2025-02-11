@@ -3,6 +3,7 @@ const Generator = require("yeoman-generator");
 const chalk = require("chalk");
 const yosay = require("yosay");
 const path = require('path');
+const fse = require("fs-extra");
 
 const config = require('./config');
 const smallBanner = require("./small-banner");
@@ -21,17 +22,26 @@ module.exports = class extends Generator {
   }
 
   initializing() {
-    this.log("initializing");
+    const _imagesFolder = this.destinationPath("_images");
 
-    this.fs.delete(this.destinationPath("_images", "*.*"));
+    if (fse.existsSync(_imagesFolder)) {
+      fse.removeSync(path.join(_imagesFolder, "etc"));
+      fse.removeSync(path.join(_imagesFolder, "appserver"));
+      fse.removeSync(path.join(_imagesFolder, "dbaccess"));
+      fse.removeSync(path.join(_imagesFolder, "mssql"));
+      fse.removeSync(path.join(_imagesFolder, "postgres"));
+      fse.removeSync(path.join(_imagesFolder, "container.bat"));
+    }
+
+    fse.ensureDirSync(_imagesFolder);
   }
 
   async prompting() {
     let answers = {}
-    let message = `${`Welcome to the`} ${chalk.blue("Container Protheus")} ${`generator.`}
+    let message = `Welcome to the ${chalk.blue("Container Protheus")} generator.
 
-${"I will help you create a Container Protheus,"}
-${"focused on development and testing."}
+I will help you create a Container Protheus,
+focused on development and testing.
 ${chalk.bold("Let's start!")}
 `;
 
@@ -386,19 +396,27 @@ ${chalk.bold("Let's start!")}
       );
     }
 
-    this.fs.copyTpl(
-      this.templatePath("build-container.bat.txt"),
-      this.destinationPath("_images", "build-container.bat"),
-      varList,
-      { debug: DEBUG_COPY_TPL }
-    );
-
-    this.fs.copyTpl(
-      this.templatePath("start-container.bat.txt"),
-      this.destinationPath("_images", "start-container.bat"),
-      varList,
-      { debug: DEBUG_COPY_TPL }
-    );
+    if (this.props.containerManager === "docker") {
+      this.fs.copyTpl(
+        this.templatePath("docker", "docker-compose.yml.txt"),
+        this.destinationPath("_images", "docker-compose.yml"),
+        varList,
+        { debug: DEBUG_COPY_TPL }
+      );
+      this.fs.copyTpl(
+        this.templatePath("docker-container.bat.txt"),
+        this.destinationPath("_images", "container.bat"),
+        varList,
+        { debug: DEBUG_COPY_TPL }
+      );
+    } else {
+      this.fs.copyTpl(
+        this.templatePath("pod-container.bat.txt"),
+        this.destinationPath("_images", "container.bat"),
+        varList,
+        { debug: DEBUG_COPY_TPL }
+      );
+    }
 
     // Mover banco de dados para o container sgdb
     // restaurar  banco de dados
