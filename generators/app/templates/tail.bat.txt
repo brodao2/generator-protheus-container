@@ -3,6 +3,4 @@ echo =======================================================
 echo        Do NOT use in PRODUCTION environments
 echo =======================================================
 echo =======================================================
-echo This batch file generate at <%= new Date().toLocaleString() %>
-echo -------------------------------------------------------
 echo Enjoy and good luck!

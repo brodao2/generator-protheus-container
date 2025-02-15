@@ -1,0 +1,57 @@
+[environment]
+RPOCUSTOM=../rpo/custom.rpo
+sourcepath=../rpo
+rootpath=../protheus_data
+StartSysInDb=1
+TopMemoMega=1
+dateformat=default
+localdbextension=.dtc
+localfiles=ctree
+pictformat=default
+rpodb=top
+rpolanguage=multi
+rpoversion=120
+startpath=\system\
+x2_path=
+;DARK=1
+Theme=dark
+
+[DBAccess]
+dataBase=<%-sgdb%>
+server=<%- containerName %>-<%-sgdb%>
+port=<%- dbPort %>
+alias=<%- dbAlias %>
+
+[drivers]
+active=tcp
+MultiProtocolPort=1
+MultiProtocolPortSecure=0
+
+[tcp]
+type=tcpip
+port=<%= appServerPort %>
+
+[LICENSECLIENT]
+SERVER=<%= licenceServer %>
+PORT=<%= licencePort %>
+
+[General]
+consoleFile=./logs/stand-alone.log
+consolelog=1
+KillStack=1
+inactiveTimeout=600
+CanAcceptDebugger=1
+MAXSTRINGSIZE=10
+BuildKillUsers=1
+CanRunJobs=1
+
+[WEBMONITOR]
+Enable=1
+Debug=1
+port=<%- webMonitorPort %>
+
+[app_monitor]
+Enable=0
+
+[WEBAPP]
+port=8089

@@ -25,12 +25,7 @@ module.exports = class extends Generator {
     const _imagesFolder = this.destinationPath("_images");
 
     if (fse.existsSync(_imagesFolder)) {
-      fse.removeSync(path.join(_imagesFolder, "etc"));
-      fse.removeSync(path.join(_imagesFolder, "appserver"));
-      fse.removeSync(path.join(_imagesFolder, "dbaccess"));
-      fse.removeSync(path.join(_imagesFolder, "mssql"));
-      fse.removeSync(path.join(_imagesFolder, "postgres"));
-      fse.removeSync(path.join(_imagesFolder, "container.bat"));
+      fse.rmSync(_imagesFolder, { recursive: true });
     }
 
     fse.ensureDirSync(_imagesFolder);
@@ -86,6 +81,9 @@ ${chalk.bold("Let's start!")}
         return;
       }
     }
+
+    this.log("Configuração para uso exclusivo em ambiente de desenvolvimento ou testes, com acesso via WebApp.");
+    this.log(chalk.bold(chalk.red("Não utilize em ambiente de produção.")));
 
     answers = await this.prompt(config.prompts.initial());
 
@@ -273,9 +271,13 @@ ${chalk.bold("Let's start!")}
       internal: false,
     });
 
-    // Gerar ini appServer,broker e secundarios
-
     if (this.props.brokerEnabled) {
+      copyList.push({
+        source: "/totvs/bin/protheus/appserver",
+        target: `/totvs/bin/protheus/broker`,
+        internal: true,
+      });
+
       secondaries.forEach((sequence) => {
         copyList.push({
           source: "/totvs/bin/protheus/appserver",
@@ -308,10 +310,47 @@ ${chalk.bold("Let's start!")}
       this.props.protheusPort,
       this.props.dbAccessPort,
     ].sort((a, b) => a < b ? -1 : 0).join(" ");
+    varList.protheusPort = this.props.protheusPort;
 
     if (this.props.brokerEnabled) {
-      // Gerar ini appserver
+      // Broker
+      this.fs.copyTpl(
+        this.templatePath("appserver", "broker.ini.txt"),
+        this.destinationPath("_images", "ini", "broker.ini"),
+        {
+          protheusPort: this.props.protheusPort,
+          secondaries: secondaries.map((sequence, index) => {
+            return {
+              sequence: `0${sequence}`,
+              port: this.props.protheusPort + index + 1,
+            }
+          })
+        },
+        { debug: DEBUG_COPY_TPL }
+      );
+      varList.copyExternalList.push({
+        source: this.destinationPath("_images", "ini", "broker.ini"),
+        target: `/totvs/bin/protheus/broker/appserver.ini`,
+        internal: false,
+      });
+
+      // Secondaries
       secondaries.forEach((sequence) => {
+        this.fs.copyTpl(
+          this.templatePath("appserver", "appserver.ini.txt"),
+          this.destinationPath("_images", "ini", `appserver-${sequence}.ini`),
+          {
+            protheusPort: this.props.protheusPort,
+            secondaries: secondaries.map((sequence, index) => {
+              return {
+                sequence: `0${sequence}`,
+                port: this.props.protheusPort + index + 1,
+              }
+            })
+          },
+          { debug: DEBUG_COPY_TPL }
+        );
+
         this.fs.copyTpl(
           this.templatePath("appserver", "appserver-daemon.sh.txt"),
           this.destinationPath("_images", "appserver", "etc", "init.d", `appserver-${sequence}.sh`),
@@ -321,7 +360,14 @@ ${chalk.bold("Let's start!")}
           },
           { debug: DEBUG_COPY_TPL }
         );
+
+        varList.copyExternalList.push({
+          source: this.destinationPath("_images", "ini", `appserver-${sequence}.ini`),
+          target: `/totvs/bin/protheus/appserver-${sequence}/appserver.ini`,
+          internal: false,
+        });
       });
+
     }
 
     this.fs.copyTpl(

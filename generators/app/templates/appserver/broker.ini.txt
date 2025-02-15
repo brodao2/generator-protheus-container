@@ -1,0 +1,16 @@
+[GENERAL]
+consoleLog=1
+consoleLogDate=0
+logTimeStamp=0
+buildKillUsers=1
+consoleFile=~/logs/broker.log
+
+[BALANCE_HTTP]
+LOCAL_SERVER_PORT = <%- protheusPort %>
+USING_WEBMONITOR=1
+
+<% secondaries.forEach((secondary) => { %>
+REMOTE_SERVER_<%- secondary.sequence %>=127.0.0.1 <%- secondary.port %><% }) %>
+
+[WebMonitor]
+debug=1

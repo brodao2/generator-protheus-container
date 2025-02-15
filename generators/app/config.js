@@ -73,13 +73,13 @@ module.exports = {
           default: 5000,
           store: true
         },
-        {
-          type: "confirm",
-          name: "protheus-security",
-          message: "Use security communication?",
-          default: true,
-          store: true
-        },
+        // {
+        //   type: "confirm",
+        //   name: "protheus-security",
+        //   message: "Use security communication?",
+        //   default: true,
+        //   store: true
+        // },
         {
           type: "confirm",
           name: "brokerEnabled",

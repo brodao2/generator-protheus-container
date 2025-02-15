@@ -5,7 +5,7 @@ if "%1" == "build" set title=BUILD
 if "%1" == "start" set title=START
 if "%1" == "stop" set title=STOP
 
-<%= include("banner.bat.txt", { appVersion: appVersion, title: "%1%"}) %>
+<%= include("banner.bat.txt", { appVersion: appVersion, title: "%title%" }) %>
 
 if "%1" == "build" goto :build
 if "%1" == "start" goto :start
