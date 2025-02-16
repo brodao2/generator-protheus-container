@@ -27,11 +27,14 @@ podman pod exists <%- containerName %>-pod
 if %errorlevel% == 0 goto :alreadyExists
 
 podman build -t "<%- containerName %>-mssql" ./mssql
-podman build -t "<%- containerName %>-appserver" --no-cache --log-level=DEBUG ./appserver
+if %errorlevel% NEQ 0 goto :buildError
+
+podman build -t "<%- containerName %>-appserver"  ./appserver
+if %errorlevel% NEQ 0 goto :buildError
 
 podman pod create <%- containerName %>-pod
-podman run -it --pod <%- containerName %>-pod --name mssql --log-level=DEBUG -d "<%- containerName %>-mssql"
-podman run -it --pod <%- containerName %>-pod --name appserver   --log-level=DEBUG -d "<%- containerName %>-appserver" /bin/sh
+podman run -it --pod <%- containerName %>-pod --name mssql  -d "<%- containerName %>-mssql"
+podman run -it --pod <%- containerName %>-pod --name appserver    -d "<%- containerName %>-appserver" /bin/sh
 podman pod stop <%- containerName %>-pod
 
 goto :end
@@ -48,6 +51,12 @@ goto :end
 
 :alreadyExists
 <%= include("error.bat.txt", { message: "Pod already exists. Name: " + containerName }) %>
+
+goto :help
+
+:buildError
+<%= include("error.bat.txt", { message: "Error during container creation" }) %>
+pause
 
 goto :help
 
