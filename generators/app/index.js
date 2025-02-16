@@ -260,24 +260,79 @@ ${chalk.bold("Let's start!")}
       internal: true,
     });
 
+    this.fs.copyTpl(
+      this.templatePath("appserver", "broker.ini.txt"),
+      this.destinationPath("_images", "appserver", "ini", "broker", "appserver.ini"),
+      {
+        protheusPort: this.props.protheusPort,
+        secondaries: secondaries.map((sequence, index) => {
+          return {
+            sequence: `0${sequence}`,
+            port: this.props.protheusPort + index + 1,
+          }
+        })
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
+
     secondaries.forEach((sequence) => {
+      this.fs.copyTpl(
+        this.templatePath("appserver", "appserver.ini.txt"),
+        this.destinationPath("_images", "appserver", "ini", `appserver-${sequence}`, "appserver.ini"),
+        {
+          sgdb: this.props.sgdb,
+          appServerPort: this.props.protheusPort,
+          licenseServer: this.props.licenseServer.split(":")[0],
+          licensePort: this.props.licenseServer.split(":")[1],
+          webMoniMonitorPort: this.props.webMonitorPort,
+          containerName: this.props.containerName,
+          dbAlias: "PROTHEUS_DB",
+          dbAccessPort: this.props.dbAccessPort,
+          webMonitorPort: this.props.webMonitorPort,
+          secondaries: secondaries.map((sequence, index) => {
+            return {
+              sequence: `0${sequence}`,
+              port: this.props.protheusPort + index + 1,
+            }
+          })
+        },
+        { debug: DEBUG_COPY_TPL }
+      );
+
       copyList.push({
         source: "/totvs/bin/protheus/appserver",
         target: `/totvs/bin/protheus/appserver-${sequence}`,
         internal: true,
       });
     });
+
+    copyList.push({
+      source: "./ini/",
+      target: `/totvs/bin/protheus/`,
+      internal: false,
+    });
   }
 
-   // eslint-disable-next-line no-unused-vars
   _prepareStandAlone(copyList) {
-    // AcopyList.push({
-    //   source: "/totvs/bin/protheus/appserver",
-    //   target: `/totvs/bin/protheus/appserver`,
-    //   internal: true,
-    // });
+    copyList.push({
+      source: "./ini/",
+      target: `/totvs/bin/protheus/`,
+      internal: false,
+    });
   }
 
+  _prepareDbaccess(varList) {
+
+    this.fs.copyTpl(
+      this.templatePath("dbaccess", "dbaccess-daemon.sh.txt"),
+      this.destinationPath("_images", "dbaccess", "etc", "init.d", "dbaccess.sh"),
+      {
+        appSequence: "",
+        ...varList
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
+  }
 
   writing() {
     this.log("writing start");
@@ -333,89 +388,38 @@ ${chalk.bold("Let's start!")}
 
     if (this.props.brokerEnabled) {
       // Broker
-      this.fs.copyTpl(
-        this.templatePath("appserver", "broker.ini.txt"),
-        this.destinationPath("_images", "ini", "broker.ini"),
-        {
-          protheusPort: this.props.protheusPort,
-          secondaries: secondaries.map((sequence, index) => {
-            return {
-              sequence: `0${sequence}`,
-              port: this.props.protheusPort + index + 1,
-            }
-          })
-        },
-        { debug: DEBUG_COPY_TPL }
-      );
-      varList.copyExternalList.push({
-        source: this.destinationPath("_images", "ini", "broker.ini"),
-        target: `/totvs/bin/protheus/broker/appserver.ini`,
-        internal: false,
-      });
 
-      // Secondaries
-      secondaries.forEach((sequence) => {
-        this.fs.copyTpl(
-          this.templatePath("appserver", "appserver.ini.txt"),
-          this.destinationPath("_images", "ini", `appserver-${sequence}.ini`),
-          {
-            sgdb: this.props.sgdb,
-            appServerPort: this.props.protheusPort,
-            licenseServer: this.props.licenseServer.split(":")[0],
-            licensePort: this.props.licenseServer.split(":")[1],
-            webMoniMonitorPort: this.props.webMonitorPort,
-            containerName: this.props.containerName,
-            dbAlias: "PROTHEUS_DB",
-            dbAccessPort: this.props.dbAccessPort,
-            webMonitorPort: this.props.webMonitorPort,
-            secondaries: secondaries.map((sequence, index) => {
-              return {
-                sequence: `0${sequence}`,
-                port: this.props.protheusPort + index + 1,
-              }
-            })
-          },
-          { debug: DEBUG_COPY_TPL }
-        );
+      //   this.fs.copyTpl(
+      //     this.templatePath("appserver", "appserver-daemon.sh.txt"),
+      //     this.destinationPath("_images", "appserver", "etc", "init.d", `appserver-${sequence}.sh`),
+      //     {
+      //       appSequence: `-${sequence}`,
+      //       ...varList
+      //     },
+      //     { debug: DEBUG_COPY_TPL }
+      //   );
 
+      //   varList.copyExternalList.push({
+      //     source: this.destinationPath("_images", "appserver", "ini", `appserver-${sequence}.ini`),
+      //     target: `/totvs/bin/protheus/appserver-${sequence}/appserver.ini`,
+      //     internal: false,
+      //   });
+      // });
+
+    }
+    /* X
         this.fs.copyTpl(
           this.templatePath("appserver", "appserver-daemon.sh.txt"),
-          this.destinationPath("_images", "appserver", "etc", "init.d", `appserver-${sequence}.sh`),
+          this.destinationPath("_images", "appserver", "etc", "init.d", "appserver.sh"),
           {
-            appSequence: `-${sequence}`,
+            appSequence: "",
             ...varList
           },
           { debug: DEBUG_COPY_TPL }
         );
+    */
 
-        varList.copyExternalList.push({
-          source: this.destinationPath("_images", "ini", `appserver-${sequence}.ini`),
-          target: `/totvs/bin/protheus/appserver-${sequence}/appserver.ini`,
-          internal: false,
-        });
-      });
-
-    }
-
-    this.fs.copyTpl(
-      this.templatePath("appserver", "appserver-daemon.sh.txt"),
-      this.destinationPath("_images", "appserver", "etc", "init.d", "appserver.sh"),
-      {
-        appSequence: "",
-        ...varList
-      },
-      { debug: DEBUG_COPY_TPL }
-    );
-
-    this.fs.copyTpl(
-      this.templatePath("dbaccess", "dbaccess-daemon.sh.txt"),
-      this.destinationPath("_images", "dbaccess", "etc", "init.d", "dbaccess.sh"),
-      {
-        appSequence: "",
-        ...varList
-      },
-      { debug: DEBUG_COPY_TPL }
-    );
+    this._prepareDbaccess(varList);
 
     this.fs.copyTpl(
       this.templatePath("appserver", "appserver-start.sh.txt"),
@@ -427,7 +431,7 @@ ${chalk.bold("Let's start!")}
       { debug: DEBUG_COPY_TPL }
     );
 
-        varList.copyInternalList = copyList.filter((copyInfo) => copyInfo.internal);
+    varList.copyInternalList = copyList.filter((copyInfo) => copyInfo.internal);
     varList.copyExternalList = copyList.filter((copyInfo) => !copyInfo.internal);
 
     this.fs.copyTpl(
