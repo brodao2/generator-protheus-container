@@ -20,10 +20,18 @@ RUN ulimit -n 32000
 ENV ACCEPT_EULA=Y
 
 # Update and install dependencies
-RUN dnf update -y
-RUN dnf install -y unixODBC
-RUN dnf install -y openssl
-RUN dnf -y install xz
+RUN dnf -y  \
+  install \
+  curl \
+  gnupg2 \
+  ca-certificates \
+  unixODBC \
+  gcc \
+  gcc-c++ \
+  make \
+  sudo \
+  krb5-devel \
+  xz
 
 # Install 7zip
 RUN mkdir /tmp/7z
@@ -35,7 +43,20 @@ RUN mv License.txt /usr/share/
 RUN cd /
 RUN rm -rf /tmp/7z
 #RUN rm 7z2409-linux-x64.tar.xz
-#UN rm 7zz
+#RUN rm 7zz
+
+################################################################################
+# Process ODBC
+################################################################################
+# Adicionar o repositório da Microsoft para o ODBC Driver 17
+# RUN curl https://packages.microsoft.com/keys/microsoft.asc | rpm --import - \
+#    && curl https://packages.microsoft.com/config/rhel/9/prod.repo | tee /etc/yum.repos.d/mssql.repo
+
+# Instalar o driver ODBC para SQL Server (msodbcsql17)
+# RUN dnf -y install msodbcsql17
+
+# Instalar o cliente SQL Server (sqlcmd)
+# RUN dnf -y install mssql-tools
 
 ################################################################################
 # Process Features
@@ -87,10 +108,14 @@ RUN chmod +x ./appserver-start.sh
 RUN /totvs/bin/dbaccess/tools/dbaccesscfg -u <%- dbUser %> -p <%- dbPassword %> \
     -d MSSQL -a SQLCONN -g "LicenseServer=<%- licenseServer %>"
 
+<%- include('../dockerfile.tail.txt', { appVersion: appVersion }) %>
+
 ################################################################################
 # Final settings
 ################################################################################
 #ENTRYPOINT [ "./appserver-start.sh" ]
+WORKDIR /root
+RUN echo "cat /etc/motd" >> .bashrc
 CMD [ "/bin/bash" ]
 
 #COPY ./appserver-entrypoint.sh ./start-app-server.sh
