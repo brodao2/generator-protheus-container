@@ -218,20 +218,7 @@ ${chalk.bold("Let's start!")}
   //   //nothing to do
   // }
 
-  writing() {
-    this.log("writing start");
-
-    let downloadList = [];
-    let tarList = [];
-    let zipList = [];
-    let copyList = [];
-    const varList = {};
-    const outputFile = (this.props.containerManager === "podman") ?
-      "Containerfile" : "Dockerfile";
-    let secondaries = [];
-    for (let index = 0; index < this.props.brokerSecondary; index++) {
-      secondaries.push(index + 1);
-    }
+  _prepareDownloadList(downloadList, tarList, zipList) {
 
     for (const feature of this.props.features) {
       this.log.info(`Select to downloading (${this.props.features.indexOf(feature) + 1}/${this.props.features.length}) ${feature}...`);
@@ -264,27 +251,47 @@ ${chalk.bold("Let's start!")}
         }
       });
     }
+  }
 
+  _prepareBroker(secondaries, copyList) {
     copyList.push({
-      source: "./etc/init.d",
-      target: "/etc/init.d/totvs.d",
-      internal: false,
+      source: "/totvs/bin/protheus/appserver",
+      target: `/totvs/bin/protheus/broker`,
+      internal: true,
     });
 
-    if (this.props.brokerEnabled) {
+    secondaries.forEach((sequence) => {
       copyList.push({
         source: "/totvs/bin/protheus/appserver",
-        target: `/totvs/bin/protheus/broker`,
+        target: `/totvs/bin/protheus/appserver-${sequence}`,
         internal: true,
       });
+    });
+  }
 
-      secondaries.forEach((sequence) => {
-        copyList.push({
-          source: "/totvs/bin/protheus/appserver",
-          target: `/totvs/bin/protheus/appserver-${sequence}`,
-          internal: true,
-        });
-      });
+   // eslint-disable-next-line no-unused-vars
+  _prepareStandAlone(copyList) {
+    // AcopyList.push({
+    //   source: "/totvs/bin/protheus/appserver",
+    //   target: `/totvs/bin/protheus/appserver`,
+    //   internal: true,
+    // });
+  }
+
+
+  writing() {
+    this.log("writing start");
+
+    let downloadList = [];
+    let tarList = [];
+    let zipList = [];
+    let copyList = [];
+    const varList = {};
+    const outputFile = (this.props.containerManager === "podman") ?
+      "Containerfile" : "Dockerfile";
+    let secondaries = [];
+    for (let index = 0; index < this.props.brokerSecondary; index++) {
+      secondaries.push(index + 1);
     }
 
     this.props.features.forEach(feature => {
@@ -297,8 +304,6 @@ ${chalk.bold("Let's start!")}
     varList.downloadList = downloadList;
     varList.tarList = tarList;
     varList.zipList = zipList;
-    varList.copyInternalList = copyList.filter((copyInfo) => copyInfo.internal);
-    varList.copyExternalList = copyList.filter((copyInfo) => !copyInfo.internal);
     varList.containerManager = this.props.containerManager;
     varList.containerName = this.props.containerName;
     varList.sgdb = this.props.sgdb;
@@ -311,6 +316,20 @@ ${chalk.bold("Let's start!")}
       this.props.dbAccessPort,
     ].sort((a, b) => a < b ? -1 : 0).join(" ");
     varList.protheusPort = this.props.protheusPort;
+
+    this._prepareDownloadList(downloadList, tarList, zipList);
+
+    // AcopyList.push({
+    //   source: "./etc/init.d",
+    //   target: "/etc/init.d/totvs.d",
+    //   internal: false,
+    // });
+
+    if (this.props.brokerEnabled) {
+      this._prepareBroker(secondaries, copyList);
+    } else {
+      this._prepareStandAlone(copyList);
+    }
 
     if (this.props.brokerEnabled) {
       // Broker
@@ -407,6 +426,9 @@ ${chalk.bold("Let's start!")}
       },
       { debug: DEBUG_COPY_TPL }
     );
+
+        varList.copyInternalList = copyList.filter((copyInfo) => copyInfo.internal);
+    varList.copyExternalList = copyList.filter((copyInfo) => !copyInfo.internal);
 
     this.fs.copyTpl(
       this.templatePath("appserver", "dockerfile.appserver.txt"),
