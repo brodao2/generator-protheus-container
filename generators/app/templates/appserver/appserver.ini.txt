@@ -19,7 +19,7 @@ Theme=dark
 [DBAccess]
 dataBase=<%-sgdb%>
 server=<%- containerName %>-<%-sgdb%>
-port=<%- dbPort %>
+port=<%- dbAccessPort %>
 alias=<%- dbAlias %>
 
 [drivers]
@@ -32,8 +32,8 @@ type=tcpip
 port=<%= appServerPort %>
 
 [LICENSECLIENT]
-SERVER=<%= licenceServer %>
-PORT=<%= licencePort %>
+SERVER=<%= licenseServer %>
+PORT=<%= licensePort %>
 
 [General]
 consoleFile=./logs/stand-alone.log

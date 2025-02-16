@@ -340,7 +340,15 @@ ${chalk.bold("Let's start!")}
           this.templatePath("appserver", "appserver.ini.txt"),
           this.destinationPath("_images", "ini", `appserver-${sequence}.ini`),
           {
-            protheusPort: this.props.protheusPort,
+            sgdb: this.props.sgdb,
+            appServerPort: this.props.protheusPort,
+            licenseServer: this.props.licenseServer.split(":")[0],
+            licensePort: this.props.licenseServer.split(":")[1],
+            webMoniMonitorPort: this.props.webMonitorPort,
+            containerName: this.props.containerName,
+            dbAlias: "PROTHEUS_DB",
+            dbAccessPort: this.props.dbAccessPort,
+            webMonitorPort: this.props.webMonitorPort,
             secondaries: secondaries.map((sequence, index) => {
               return {
                 sequence: `0${sequence}`,
