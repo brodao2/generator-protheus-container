@@ -98,8 +98,7 @@ module.exports = {
       return feature.id === featureId;
     }).forEach((feature) => {
       feature.urls.forEach((url) => {
-        const credential = encodeURI(`${user}:${password}`)
-        // .replaceAll("@", "%40")
+        const credential = encodeURI(`${user}:${password}`).replaceAll("@", "%40")
         // .replaceAll("!", "%40");
 
         result.push(
