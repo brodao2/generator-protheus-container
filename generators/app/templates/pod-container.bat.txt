@@ -33,19 +33,25 @@ podman build -t "<%- containerName %>-appserver"  ./appserver
 if %errorlevel% NEQ 0 goto :buildError
 
 podman pod create <%- containerName %>-pod
+if %errorlevel% NEQ 0 goto :buildError
 podman run -it --pod <%- containerName %>-pod --name mssql  -d "<%- containerName %>-mssql"
+if %errorlevel% NEQ 0 goto :buildError
 podman run -it --pod <%- containerName %>-pod --name appserver    -d "<%- containerName %>-appserver" /bin/sh
+if %errorlevel% NEQ 0 goto :buildError
 podman pod stop <%- containerName %>-pod
+if %errorlevel% NEQ 0 goto :buildError
 
 goto :end
 
 :start
 podman pod start <%- containerName %>-pod
+if %errorlevel% NEQ 0 goto :startError
 
 goto :end
 
 :stop
 podman pod stop <%- containerName %>-pod
+if %errorlevel% NEQ 0 goto :stopError
 
 goto :end
 
@@ -56,6 +62,18 @@ goto :help
 
 :buildError
 <%= include("error.bat.txt", { message: "Error during container creation" }) %>
+pause
+
+goto :help
+
+:startError
+<%= include("error.bat.txt", { message: "Error during container starting" }) %>
+pause
+
+goto :help
+
+:stopError
+<%= include("error.bat.txt", { message: "Error during container stopping" }) %>
 pause
 
 goto :help
