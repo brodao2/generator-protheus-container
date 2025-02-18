@@ -28,6 +28,10 @@ module.exports = class extends Generator {
       fse.rmSync(_imagesFolder, { recursive: true });
     }
 
+    if (fse.existsSync("container.bat")) {
+      fse.removeSync("container.bat");
+    }
+
     fse.ensureDirSync(_imagesFolder);
   }
 
@@ -70,7 +74,7 @@ ${chalk.bold("Let's start!")}
               name: "password",
               message: "Password",
               mask: "*",
-              default: this.options.password || "",
+              default: this.options.password || "Divisao@Panzer1932",
               // Store: true
             },
           ])
@@ -253,12 +257,22 @@ ${chalk.bold("Let's start!")}
     }
   }
 
-  _prepareBroker(secondaries, copyList) {
+  _prepareBroker(secondaries, copyList, varList) {
     copyList.push({
       source: "/totvs/bin/protheus/appserver",
-      target: `/totvs/bin/protheus/broker`,
+      target: "/totvs/bin/protheus/broker",
       internal: true,
     });
+
+    this.fs.copyTpl(
+      this.templatePath("appserver", "appserver-broker.sh.txt"),
+      this.destinationPath("_images", "appserver", "etc", "init.d", "appserver.sh"),
+      {
+        appSequence: "",
+        ...varList
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
 
     this.fs.copyTpl(
       this.templatePath("appserver", "broker.ini.txt"),
@@ -286,7 +300,6 @@ ${chalk.bold("Let's start!")}
           licensePort: this.props.licenseServer.split(":")[1],
           webMoniMonitorPort: this.props.webMonitorPort,
           containerName: this.props.containerName,
-          dbAlias: "PROTHEUS_DB",
           dbAccessPort: this.props.dbAccessPort,
           webMonitorPort: this.props.webMonitorPort,
           secondaries: secondaries.map((sequence, index) => {
@@ -295,6 +308,16 @@ ${chalk.bold("Let's start!")}
               port: this.props.protheusPort + index + 1,
             }
           })
+        },
+        { debug: DEBUG_COPY_TPL }
+      );
+
+      this.fs.copyTpl(
+        this.templatePath("appserver", "appserver-daemon.sh.txt"),
+        this.destinationPath("_images", "appserver", "etc", "init.d", `appserver-${sequence}.sh`),
+        {
+          appSequence: `-${sequence}`,
+          ...varList
         },
         { debug: DEBUG_COPY_TPL }
       );
@@ -313,12 +336,23 @@ ${chalk.bold("Let's start!")}
     });
   }
 
-  _prepareStandAlone(copyList) {
+  _prepareStandAlone(copyList, varList) {
     copyList.push({
       source: "./ini/",
       target: `/totvs/bin/protheus/`,
       internal: false,
     });
+
+    this.fs.copyTpl(
+      this.templatePath("appserver", "appserver-daemon.sh.txt"),
+      this.destinationPath("_images", "appserver", "etc", "init.d", `appserver.sh`),
+      {
+        appSequence: "",
+        ...varList
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
+
   }
 
   _prepareDbaccess(varList) {
@@ -356,9 +390,8 @@ ${chalk.bold("Let's start!")}
     });
 
     varList.appVersion = this.fs.readJSON(this.destinationPath("package.json")).version;
-    varList.downloadList = downloadList;
-    varList.tarList = tarList;
     varList.zipList = zipList;
+    varList.tarList = tarList;
     varList.containerManager = this.props.containerManager;
     varList.containerName = this.props.containerName;
     varList.sgdb = this.props.sgdb;
@@ -374,40 +407,19 @@ ${chalk.bold("Let's start!")}
 
     this._prepareDownloadList(downloadList, tarList, zipList);
 
+    if (this.props.brokerEnabled) {
+      this._prepareBroker(secondaries, copyList, varList);
+    } else {
+      this._prepareStandAlone(copyList, varList);
+    }
+
+    /* X
     // AcopyList.push({
     //   source: "./etc/init.d",
     //   target: "/etc/init.d/totvs.d",
     //   internal: false,
     // });
 
-    if (this.props.brokerEnabled) {
-      this._prepareBroker(secondaries, copyList);
-    } else {
-      this._prepareStandAlone(copyList);
-    }
-
-    if (this.props.brokerEnabled) {
-      // Broker
-
-      //   this.fs.copyTpl(
-      //     this.templatePath("appserver", "appserver-daemon.sh.txt"),
-      //     this.destinationPath("_images", "appserver", "etc", "init.d", `appserver-${sequence}.sh`),
-      //     {
-      //       appSequence: `-${sequence}`,
-      //       ...varList
-      //     },
-      //     { debug: DEBUG_COPY_TPL }
-      //   );
-
-      //   varList.copyExternalList.push({
-      //     source: this.destinationPath("_images", "appserver", "ini", `appserver-${sequence}.ini`),
-      //     target: `/totvs/bin/protheus/appserver-${sequence}/appserver.ini`,
-      //     internal: false,
-      //   });
-      // });
-
-    }
-    /* X
         this.fs.copyTpl(
           this.templatePath("appserver", "appserver-daemon.sh.txt"),
           this.destinationPath("_images", "appserver", "etc", "init.d", "appserver.sh"),
@@ -437,7 +449,12 @@ ${chalk.bold("Let's start!")}
     this.fs.copyTpl(
       this.templatePath("appserver", "dockerfile.appserver.txt"),
       this.destinationPath("_images", "appserver", outputFile),
-      varList,
+      {
+        ...varList,
+        downloadList: downloadList.filter((value) => {
+          return !value.file.startsWith("dbaccess");
+        })
+      },
       { debug: DEBUG_COPY_TPL }
     );
 
@@ -445,13 +462,12 @@ ${chalk.bold("Let's start!")}
       this.fs.copyTpl(
         this.templatePath("mssql", "dockerfile.mssql.txt"),
         this.destinationPath("_images", "mssql", outputFile),
-        varList,
-        { debug: DEBUG_COPY_TPL }
-      );
-      this.fs.copyTpl(
-        this.templatePath("mssql", "odbc.ini.txt"),
-        this.destinationPath("_images", "etc", "odbc.ini"),
-        varList,
+        {
+          ...varList,
+          downloadList: downloadList.filter((value) => {
+            return value.file.startsWith("dbaccess")
+          })
+        },
         { debug: DEBUG_COPY_TPL }
       );
 
@@ -485,14 +501,14 @@ ${chalk.bold("Let's start!")}
       );
       this.fs.copyTpl(
         this.templatePath("docker-container.bat.txt"),
-        this.destinationPath("_images", "container.bat"),
+        this.destinationPath(".", "container.bat"),
         varList,
         { debug: DEBUG_COPY_TPL }
       );
     } else {
       this.fs.copyTpl(
         this.templatePath("pod-container.bat.txt"),
-        this.destinationPath("_images", "container.bat"),
+        this.destinationPath(".", "container.bat"),
         varList,
         { debug: DEBUG_COPY_TPL }
       );

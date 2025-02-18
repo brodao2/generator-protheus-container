@@ -11,7 +11,81 @@ USER root
 RUN ulimit -n 32000
 ENV ACCEPT_EULA=Y
 
-#RUN /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd' -Q "CREATE DATABASE [protheus]";
+RUN apt update -y
+RUN apt upgrade -y
+
+RUN apt install curl -y
+
+################################################################################
+# Process ODBC
+################################################################################
+# Adicionar o repositório da Microsoft para o ODBC Driver 17
+# RUN curl https://packages.microsoft.com/keys/microsoft.asc | rpm --import - \
+#    && curl https://packages.microsoft.com/config/rhel/9/prod.repo | tee /etc/yum.repos.d/mssql.repo
+#RUN sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+#RUN sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
+
+# Instalar o driver ODBC para SQL Server (msodbcsql17)
+RUN apt-get  -y install unixodbc-dev msodbcsql17
+
+# Instalar o cliente SQL Server (sqlcmd)
+RUN apt-get  -y install mssql-tools
+
+# Install MS-SQL ODBC Driver
+# RUN curl https://packages.microsoft.com/config/rhel/8/prod.repo > /etc/yum.repos.d/mssql-release.repo
+# RUN dnf install -y msodbcsql17
+
+# Criar a configuração do ODBC (editar /etc/odbcinst.ini e /etc/odbc.ini)
+RUN echo "[ODBC Driver 17 for SQL Server]" > /etc/odbcinst.ini \
+    && echo "Description=Microsoft ODBC Driver 17 for SQL Server" >> /etc/odbcinst.ini \
+    && echo "Driver=/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.x.so" >> /etc/odbcinst.ini \
+    && echo "[MSSQLServer]" > /etc/odbc.ini \
+    && echo "Driver=ODBC Driver 17 for SQL Server" >> /etc/odbc.ini \
+    && echo "Server=localhost,1433" >> /etc/odbc.ini \
+    && echo "Database=Protheus_DB" >> /etc/odbc.ini \
+    && echo "UID=<%= dbUser %>" >> /etc/odbc.ini \
+    && echo "PWD=<%= dbPassword %>" >> /etc/odbc.ini
+
+################################################################################
+# Process Features
+################################################################################
+# Download features
+<% downloadList.forEach(function(download) { %>
+RUN mkdir -p <%= download.folder %>
+RUN curl -o <%= download.folder %>/<%= download.file %> \
+  <%= download.source -%>
+<% }) %>
+
+# Decompress features
+<% tarList.forEach(function(decompress) { %>
+RUN cd <%= decompress.folder %> \
+  && tar -xzvf <%= decompress.file %> \
+  && rm <%= decompress.file %>
+<% }) -%>
+<% zipList.forEach(function(decompress) { %>
+RUN cd <%= decompress.folder %> \
+  && 7zzs x -y <%= decompress.file %> \
+  && rm <%= decompress.file %>
+<% }) -%>
+
+################################################################################
+# DBAccess configuration
+################################################################################
+RUN /totvs/bin/dbaccess/tools/dbaccesscfg -u <%- dbUser %> -p <%- dbPassword %> \
+    -d MSSQL -a SQLCONN -g "LicenseServer=<%- licenseServer %>"
+
+<%- include('../dockerfile.tail.txt', { appVersion: appVersion }) %>
+
+################################################################################
+# Final settings
+################################################################################
+#ENTRYPOINT [ "./appserver-start.sh" ]
+WORKDIR /root
+RUN echo "export PATH=\$PATH:/opt/mssql-tools/bin\n" >> .bashrc
+RUN echo "cat /etc/motd" >> .bashrc
+##CMD [ "/bin/bash" ]
+
+#RUN source /root/.bashrc
 
 EXPOSE 4050
 

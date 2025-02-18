@@ -1,5 +1,6 @@
 @echo off
 set title=HELP
+cd _images
 
 if "%1" == "build" set title=BUILD
 if "%1" == "rebuild" set title=REBUILD
@@ -93,4 +94,5 @@ goto :end2
 <%= include("tail.bat.txt") %>
 
 :end2
+cd ..
 if "%2" == "-p" pause

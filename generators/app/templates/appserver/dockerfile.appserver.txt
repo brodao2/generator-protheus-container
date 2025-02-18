@@ -46,19 +46,6 @@ RUN rm -rf /tmp/7z
 #RUN rm 7zz
 
 ################################################################################
-# Process ODBC
-################################################################################
-# Adicionar o repositório da Microsoft para o ODBC Driver 17
-# RUN curl https://packages.microsoft.com/keys/microsoft.asc | rpm --import - \
-#    && curl https://packages.microsoft.com/config/rhel/9/prod.repo | tee /etc/yum.repos.d/mssql.repo
-
-# Instalar o driver ODBC para SQL Server (msodbcsql17)
-# RUN dnf -y install msodbcsql17
-
-# Instalar o cliente SQL Server (sqlcmd)
-# RUN dnf -y install mssql-tools
-
-################################################################################
 # Process Features
 ################################################################################
 # Download features
@@ -101,12 +88,6 @@ COPY <%= copyInfo.source %> <%= copyInfo.target %>
 
 COPY appserver-start.sh /appserver-start.sh
 RUN chmod +x ./appserver-start.sh
-
-################################################################################
-# DBAccess configuration
-################################################################################
-RUN /totvs/bin/dbaccess/tools/dbaccesscfg -u <%- dbUser %> -p <%- dbPassword %> \
-    -d MSSQL -a SQLCONN -g "LicenseServer=<%- licenseServer %>"
 
 <%- include('../dockerfile.tail.txt', { appVersion: appVersion }) %>
 

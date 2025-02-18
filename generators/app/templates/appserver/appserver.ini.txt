@@ -20,7 +20,7 @@ Theme=dark
 dataBase=<%-sgdb%>
 server=<%- containerName %>-<%-sgdb%>
 port=<%- dbAccessPort %>
-alias=<%- dbAlias %>
+alias=Protheus_DB
 
 [drivers]
 active=tcp
