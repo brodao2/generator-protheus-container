@@ -4,6 +4,19 @@
 
 Container Protheus Generator for Yeoman.
 
+> - **NÃO COMPARTILHE OS ARQUIVOS** `container.bat` e `yo-rc.json`
+>   Estes arquivos podem conter senhas e chaves de acesso.
+> - **NÃO COMPARTILHE A PASTA** `_images`
+>   Esta pasta contem arquivos necessários para a construção dos containers e pode conter senhas e chaves de acesso.
+
+> Adicione no `.gitignore'
+```console
+/_images
+.yo-rc.json
+container.bat
+container.sh
+```
+
 ## Requisitos
 
 * [Node.js](https://nodejs.org/)
