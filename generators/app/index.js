@@ -221,6 +221,24 @@ ${chalk.bold("Let's start!")}
   // default() {
   //   //nothing to do
   // }
+  _prepareStartAppServer(secondaries, copyList, varList) {
+    this.fs.copyTpl(
+      this.templatePath("appserver", "appserver-start.sh.txt"),
+      this.destinationPath("_images", "appserver", "appserver-start.sh"),
+      {
+        secondaries: secondaries,
+        ...varList
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
+
+    // CopyList.push({
+    //    source: "./etc/init.d",
+    //    target: "/etc/init.d/totvs.d",
+    //    internal: false,
+    //  });
+
+  }
 
   _prepareDownloadList(downloadList, tarList, zipList) {
 
@@ -239,18 +257,21 @@ ${chalk.bold("Let's start!")}
           source: sourcePath,
           file: `${targetFile}`,
           folder: `${targetFolder}`,
+          container: url.container
         });
 
         if (path.extname(sourcePath) === ".gz") {
           tarList.push({
             file: `${targetFile}`,
             folder: `${targetFolder}`,
+            container: url.container
           });
         } else if (
           (path.extname(sourcePath) === ".zip")) {
           zipList.push({
             file: `${targetFile}`,
             folder: `${targetFolder}`,
+            container: url.container
           });
         }
       });
@@ -390,8 +411,6 @@ ${chalk.bold("Let's start!")}
     });
 
     varList.appVersion = this.fs.readJSON(this.destinationPath("package.json")).version;
-    varList.zipList = zipList;
-    varList.tarList = tarList;
     varList.containerManager = this.props.containerManager;
     varList.containerName = this.props.containerName;
     varList.sgdb = this.props.sgdb;
@@ -413,35 +432,11 @@ ${chalk.bold("Let's start!")}
       this._prepareStandAlone(copyList, varList);
     }
 
-    /* X
-    // AcopyList.push({
-    //   source: "./etc/init.d",
-    //   target: "/etc/init.d/totvs.d",
-    //   internal: false,
-    // });
+    this._prepareStartAppServer(secondaries, copyList, varList);
 
-        this.fs.copyTpl(
-          this.templatePath("appserver", "appserver-daemon.sh.txt"),
-          this.destinationPath("_images", "appserver", "etc", "init.d", "appserver.sh"),
-          {
-            appSequence: "",
-            ...varList
-          },
-          { debug: DEBUG_COPY_TPL }
-        );
-    */
+
 
     this._prepareDbaccess(varList);
-
-    this.fs.copyTpl(
-      this.templatePath("appserver", "appserver-start.sh.txt"),
-      this.destinationPath("_images", "appserver", "appserver-start.sh"),
-      {
-        secondaries: secondaries,
-        ...varList
-      },
-      { debug: DEBUG_COPY_TPL }
-    );
 
     varList.copyInternalList = copyList.filter((copyInfo) => copyInfo.internal);
     varList.copyExternalList = copyList.filter((copyInfo) => !copyInfo.internal);
@@ -452,7 +447,13 @@ ${chalk.bold("Let's start!")}
       {
         ...varList,
         downloadList: downloadList.filter((value) => {
-          return !value.file.startsWith("dbaccess");
+          return value.container === "appserver";
+        }),
+        tarList: tarList.filter((value) => {
+          return value.container === "appserver";
+        }),
+        zipList: zipList.filter((value) => {
+          return value.container === "appserver";
         })
       },
       { debug: DEBUG_COPY_TPL }
@@ -465,7 +466,13 @@ ${chalk.bold("Let's start!")}
         {
           ...varList,
           downloadList: downloadList.filter((value) => {
-            return value.file.startsWith("dbaccess")
+            return value.container === "sgdb";
+          }),
+          tarList: tarList.filter((value) => {
+            return value.container === "sgdb";
+          }),
+          zipList: zipList.filter((value) => {
+            return value.container === "sgdb";
           })
         },
         { debug: DEBUG_COPY_TPL }
@@ -514,8 +521,7 @@ ${chalk.bold("Let's start!")}
       );
     }
 
-    // Mover banco de dados para o container sgdb
-    // restaurar  banco de dados
+    // Restaurar  banco de dados
 
     // rodar configuração do dbaccess
 
@@ -548,7 +554,7 @@ ${"To see public ports, run the following command:"}
   ${colorConsole(`${this.props.containerManager} container ls --format "{{.Names}} {{.Ports}}" \\
     -f ancestor=${this.props.containerName}`)}
 
-${"Enjoy and good luck!"}`;
+${"Enjoy and good luck! :)"}`;
 
     if (this.options['skip-banner']) {
       this.log(message);

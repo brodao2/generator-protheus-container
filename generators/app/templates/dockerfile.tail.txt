@@ -10,4 +10,6 @@ RUN echo "=====================================================" > /etc/motd \
   && echo "Details:"  >> /etc/motd \
   && echo "#########################################################" >> /etc/motd \
   && echo "DO NOT USE IN PRODUCTION ENVIRONMENTS." >> /etc/motd \
-  && echo "#########################################################" >> /etc/motd
+  && echo "#########################################################" >> /etc/motd \
+  && echo "Enjoy and good luck! :)" >> /etc/motd \
+  && echo "" >> /etc/motd

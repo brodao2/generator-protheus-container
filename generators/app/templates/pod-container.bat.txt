@@ -30,14 +30,14 @@ if %errorlevel% == 0 goto :alreadyExists
 podman build -t "<%- containerName %>-mssql" ./mssql
 if %errorlevel% NEQ 0 goto :buildError
 
-podman build -t "<%- containerName %>-appserver"  ./appserver
+podman build -t "<%- containerName %>-appserver" ./appserver
 if %errorlevel% NEQ 0 goto :buildError
 
 podman pod create <%- containerName %>-pod
 if %errorlevel% NEQ 0 goto :buildError
-podman run -it --pod <%- containerName %>-pod --name mssql  -d "<%- containerName %>-mssql"
+podman run -it --pod <%- containerName %>-pod --name mssql -d "<%- containerName %>-mssql"
 if %errorlevel% NEQ 0 goto :buildError
-podman run -it --pod <%- containerName %>-pod --name appserver    -d "<%- containerName %>-appserver" /bin/sh
+podman run -it --pod <%- containerName %>-pod --name appserver -d "<%- containerName %>-appserver" /bin/sh
 if %errorlevel% NEQ 0 goto :buildError
 podman pod stop <%- containerName %>-pod
 if %errorlevel% NEQ 0 goto :buildError

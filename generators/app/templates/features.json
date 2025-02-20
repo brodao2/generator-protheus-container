@@ -1,18 +1,9 @@
 {
   "protheus_onca": {
     "name": "Protheus",
-    "os": [
-      "linux"
-    ],
-    "arch": [
-      "32",
-      "64"
-    ],
-    "versions": [
-      "24.3.0.1",
-      "24.3.0.2",
-      "24.3.0.3"
-    ],
+    "os": ["linux"],
+    "arch": ["32", "64"],
+    "versions": ["24.3.0.1", "24.3.0.2", "24.3.0.3"],
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/appserver/panthera_onca/{os}/{arch}/builds/{version}/appserver.tar.gz",
@@ -22,17 +13,10 @@
   },
   "protheus_harpia": {
     "name": "Protheus",
-    "os": [
-      "linux"
-    ],
-    "arch": [
-      "32",
-      "64"
-    ],
+    "os": ["linux"],
+    "arch": ["32", "64"],
     "description": "Harpia, {os}-{arch}",
-    "versions": [
-      "20.3.2.17"
-    ],
+    "versions": ["20.3.2.17"],
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/appserver/harpia/{os}/{arch}/builds/{version}/appserver.tar.gz",
@@ -42,38 +26,22 @@
   },
   "dbaccess": {
     "name": "DBAccess",
-    "os": [
-      "linux"
-    ],
-    "arch": [
-      "32",
-      "64"
-    ],
-    "versions": [
-      "23.1.1.7",
-      "24.1.0.0"
-    ],
+    "os": ["linux"],
+    "arch": ["32", "64"],
+    "versions": ["23.1.1.7", "24.1.0.0"],
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/dbaccess/{os}/{arch}/builds/{version}/dbaccess.tar.gz",
-        "targetFolder": "/totvs/bin/dbaccess"
+        "targetFolder": "/totvs/bin/dbaccess",
+        "container": "sgdb"
       }
     ]
   },
   "webapp_onca": {
     "name": "WebApp",
-    "os": [
-      "linux"
-    ],
-    "arch": [
-      "32",
-      "64"
-    ],
-    "versions": [
-      "10.0.7",
-      "10.0.8",
-      "10.0.9"
-    ],
+    "os": ["linux"],
+    "arch": ["32", "64"],
+    "versions": ["10.0.7", "10.0.8", "10.0.9"],
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/smartclientwebapp/panthera_onca/{os}/{arch}/builds/{version}/smartclientwebapp.tar.gz",
@@ -83,18 +51,9 @@
   },
   "webapp_harpia": {
     "name": "WebApp",
-    "os": [
-      "linux"
-    ],
-    "arch": [
-      "32",
-      "64"
-    ],
-    "versions": [
-      "9.1.6",
-      "9.1.7",
-      "9.1.8"
-    ],
+    "os": ["linux"],
+    "arch": ["32", "64"],
+    "versions": ["9.1.6", "9.1.7", "9.1.8"],
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/smartclientwebapp/harpia/{os}/{arch}/builds/{version}/smartclientwebapp.tar.gz",
@@ -106,9 +65,7 @@
     "name": "RPO, Data e Database",
     "os": [],
     "arch": [],
-    "versions": [
-      "12.1.2410"
-    ],
+    "versions": ["12.1.2410"],
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/protheus/padrao/builds/{version}/published/repositorio/panthera_onca/tttm120.rpo",
@@ -120,7 +77,8 @@
       },
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/engenharia/base_congelada/protheus/bra/{version}/exp_com_dic/latest/{sgdb}.zip",
-        "targetFolder": "/totvs/database"
+        "targetFolder": "/totvs/database",
+        "container": "sgdb"
       }
     ]
   },
@@ -128,9 +86,7 @@
     "name": "RPO, Data e Database",
     "os": [],
     "arch": [],
-    "versions": [
-      "12.1.2310"
-    ],
+    "versions": ["12.1.2310"],
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/protheus/padrao/builds/{version}/published/repositorio/panthera_onca/tttm120.rpo",

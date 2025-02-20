@@ -114,6 +114,7 @@ module.exports = {
               .replace("{arch}", arch)
               .replace("{version}", version)
               .replace("{sgdb}", sgdb),
+            container: url.container || "appserver"
           });
       });
     });

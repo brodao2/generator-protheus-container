@@ -3,4 +3,4 @@ echo =======================================================
 echo        Do NOT use in PRODUCTION environments
 echo =======================================================
 echo =======================================================
-echo Enjoy and good luck!
+echo Enjoy and good luck! :)

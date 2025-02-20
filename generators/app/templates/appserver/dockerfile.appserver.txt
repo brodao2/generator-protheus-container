@@ -33,17 +33,7 @@ RUN dnf -y  \
   krb5-devel \
   xz
 
-# Install 7zip
-RUN mkdir /tmp/7z
-RUN cd /tmp/7z
-RUN curl -s -L -k -O "https://7zip.org/a/7z2409-linux-x64.tar.xz"
-RUN tar xf 7z*xz
-RUN mv 7zzs /usr/bin/
-RUN mv License.txt /usr/share/
-RUN cd /
-RUN rm -rf /tmp/7z
-#RUN rm 7z2409-linux-x64.tar.xz
-#RUN rm 7zz
+<%-include('../7zip.dockerfile.txt') %>
 
 ################################################################################
 # Process Features
