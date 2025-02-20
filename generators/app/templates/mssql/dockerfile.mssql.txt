@@ -10,26 +10,40 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 USER root
 RUN ulimit -n 32000
 ENV ACCEPT_EULA=Y
+ENV SA_PASSWORD=<%= dbPassword %>
 
 RUN apt update -y
-RUN apt upgrade -y
+# RUN apt upgrade -y
 
-RUN apt install curl -y
+RUN apt-get -y install \
+  curl \
+  xz-utils \
+  libgl1-mesa-glx \
+  libxmu6 \
+  libxrender1 \
+  libxrandr2 \
+  libxcursor1 \
+  libxinerama1 \
+  libxft2 \
+  libfreetype6 \
+  libfontconfig1 \
+  libsm6 \
+  libice6 \
+  libxext6 \
+  libx11-6
+
+<%-include('../7zip.dockerfile.txt') %>
 
 ################################################################################
 # Process ODBC
 ################################################################################
 # Adicionar o repositório da Microsoft para o ODBC Driver 17
-# RUN curl https://packages.microsoft.com/keys/microsoft.asc | rpm --import - \
-#    && curl https://packages.microsoft.com/config/rhel/9/prod.repo | tee /etc/yum.repos.d/mssql.repo
-#RUN sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-#RUN sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
 # Instalar o driver ODBC para SQL Server (msodbcsql17)
-RUN apt-get  -y install unixodbc-dev msodbcsql17
+RUN apt-get -y install unixodbc-dev msodbcsql17
 
 # Instalar o cliente SQL Server (sqlcmd)
-RUN apt-get  -y install mssql-tools
+RUN apt-get -y install mssql-tools
 
 # Install MS-SQL ODBC Driver
 # RUN curl https://packages.microsoft.com/config/rhel/8/prod.repo > /etc/yum.repos.d/mssql-release.repo
@@ -81,11 +95,38 @@ RUN /totvs/bin/dbaccess/tools/dbaccesscfg -u <%- dbUser %> -p <%- dbPassword %> 
 ################################################################################
 #ENTRYPOINT [ "./appserver-start.sh" ]
 WORKDIR /root
-RUN echo "export PATH=\$PATH:/opt/mssql-tools/bin\n" >> .bashrc
-RUN echo "cat /etc/motd" >> .bashrc
+RUN echo "export PATH=\$PATH:/opt/mssql-tools/bin" >> .bashrc \
+    && echo "export LD_LIBRARY_PATH=/opt/microsoft/msodbcsql17/lib64:\$LD_LIBRARY_PATH" >> .bashrc \
+    && echo "ln -sf /opt/mssql/lib/libc++.so /opt/mssql/lib/libc++.so.1" >> .bashrc \
+    && echo "ln -sf /opt/mssql/lib/libc++abi.so /opt/mssql/lib/libc++abi.so.1" >> .bashrc \
+    && echo "ln -sf /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.10.so.6.1 /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.x.so" >> .bashrc
+
+# Anexar base de dados
+RUN echo "echo * Anexando base de dados..." >> .bashrc \
+    && echo "sqlcmd -Q \
+        \"use [master] \n \
+        go\n \
+        CREATE DATABASE [Protheus_DB] ON ( FILENAME = N'/totvs/database/P1212410MNTDBEXP.mdf' ), ( FILENAME = N'/totvs/database/P1212410MNTDBEXP_log.ldf' ) FOR ATTACH\n \
+        GO\"\n\n" >> .bashrc
+
+        USE [P1212410MNTDBEXP]
+GO
+ALTER USER [dbo] WITH NAME=[sa]
+GO
+USE [P1212410MNTDBEXP]
+GO
+ALTER ROLE [db_owner] DROP MEMBER [dbo]
+GO
+
+RUN echo "echo * Base de dados anexada" >> .bashrc \
+
+RUN echo "cat /etc/motd\n" >> .bashrc
+
+RUN echo "alias dbmonitor=/totvs/bin/dbaccess/dbmonitor" >> .bash_aliases \
+    && echo "alias sqlcmd='/opt/mssql-tools/bin/sqlcmd -U sa -P <%= dbPassword %>'" >> .bash_aliases
 ##CMD [ "/bin/bash" ]
 
 #RUN source /root/.bashrc
 
-EXPOSE 4050
+EXPOSE 7890
 
