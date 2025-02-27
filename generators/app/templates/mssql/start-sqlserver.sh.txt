@@ -6,11 +6,8 @@ export LD_LIBRARY_PATH=/opt/microsoft/msodbcsql17/lib64:$LD_LIBRARY_PATH
 ln -sfv /opt/mssql/lib/libc++abi.so /opt/mssql/lib/libc++abi.so.1
 ln -sfv /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.10.so.6.1 /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.x.so
   
-alias dbmonitor=/totvs/bin/dbaccess/dbmonitor
 alias sqlcmd='/opt/mssql-tools/bin/sqlcmd -U sa -P <%= dbPassword %>'
     
-#/root/.bashrc
-
 /opt/mssql/bin/sqlservr &
 sleep 15
 
@@ -30,5 +27,5 @@ echo "*"
 
 cat /etc/motd
 
-#/bin/bash
+/bin/bash
 

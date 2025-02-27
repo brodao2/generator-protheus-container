@@ -95,6 +95,11 @@ RUN /totvs/bin/dbaccess/tools/dbaccesscfg -u <%- dbUser %> -p <%- dbPassword %> 
 # Final settings
 ################################################################################
 WORKDIR /root
+RUN echo "cat /etc/motd" >> ./.bashrc
+
+RUN echo "alias dbmonitor=/totvs/bin/dbaccess/dbmonitor" >> ./.bash_aliases
+RUN echo "alias sqlcmd='/opt/mssql-tools/bin/sqlcmd -U sa -P <%= dbPassword %>'" >> ./.bash_aliases
+
 COPY start-sqlserver.sh start-sqlserver.sh
 RUN chmod +x start-sqlserver.sh
 
@@ -104,8 +109,6 @@ COPY /etc/init.d/dbaccess.sh /etc/init.d/dbaccess.sh
 RUN chmod +x /etc/init.d/dbaccess.sh
 
 cmd /root/start-sqlserver.sh
-
-#RUN source /root/.bashrc
 
 EXPOSE 7890
 
