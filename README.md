@@ -66,7 +66,7 @@ Com o container inicializado, inicie a execução do dbMonitor no ambiente hospe
 Use a porta informada na definição do container. Caso não consiga conexão, verifique a porta pública:
 
 ```console
-podman ?????
+podman ps --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}"
 ```
 ### SSMS
 
@@ -77,7 +77,7 @@ Com o container inicializado, inicie a execução do SSMS no ambiente hospedeiro
 Use a porta e senha, informado na definição do container. Caso não consiga conexão, verifique a porta pública:
 
 ```console
-podman ?????
+podman ps --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}"
 ```
 
 > O atributo ``Server Name`` tem o formato: `address server` **`,`** `port number`.
