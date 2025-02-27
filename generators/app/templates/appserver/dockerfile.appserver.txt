@@ -63,7 +63,7 @@ RUN cd <%= decompress.folder %> \
 # Internal (image to image )
 <% copyInternalList.forEach(function(copyInfo) { %>
 RUN mkdir <%= copyInfo.target %>
-RUN cp <%= copyInfo.source %>/*.* <%= copyInfo.target %>
+RUN cp -v -r <%= copyInfo.source %>/* <%= copyInfo.target %>/
 #RUN if [ -e "<%= copyInfo.target %>/*.sh" ]; then \
 #  fi
 <% }); %>
@@ -76,8 +76,12 @@ COPY <%= copyInfo.source %> <%= copyInfo.target %>
 #  fi
 <% }); %>
 
+RUN mkdir /etc/init.d/totvs.d
+COPY etc/init.d/* /etc/init.d/totvs.d/
+RUN chmod +x /etc/init.d/totvs.d/*.sh
+
 COPY appserver-start.sh /appserver-start.sh
-RUN chmod +x ./appserver-start.sh
+RUN chmod +x /appserver-start.sh
 
 <%- include('../dockerfile.tail.txt', { appVersion: appVersion }) %>
 

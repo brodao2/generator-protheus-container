@@ -5,10 +5,12 @@
 # CAUTION: Manual editions can be overwritten
 # =======================================================
 
-/etc/init.d/totvs.d/dbaccess.sh start
-
 <% for (var i = 0; i < secondaries.length; i++) { %>
 /etc/init.d/totvs.d/appserver-<%- i+1 %>.sh start
 <% } %>
 
 /etc/init.d/totvs.d/appserver.sh start
+
+cat /etc/motd
+
+/bin/bash
