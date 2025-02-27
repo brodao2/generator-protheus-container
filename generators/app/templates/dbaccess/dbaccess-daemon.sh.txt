@@ -63,7 +63,7 @@ green='\033[32m'
 reset='\033[m'
 
 ###################################################################
-# Exporta as variaveis de ambiente do Oracle
+# Exporta as variáveis de ambiente do Oracle
 ###################################################################
 exportOracle() {
     if [ ${envOracle} -eq 1 ]
@@ -90,6 +90,7 @@ test -x $progbin || {
   if [ "$1" = "stop" ]; then
     exit 0
   else exit 5; fi
+}
 
 #################################################################
 ## Aplica configurações do serviço

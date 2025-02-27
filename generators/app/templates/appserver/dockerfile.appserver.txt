@@ -84,22 +84,9 @@ RUN chmod +x ./appserver-start.sh
 ################################################################################
 # Final settings
 ################################################################################
-#ENTRYPOINT [ "./appserver-start.sh" ]
-WORKDIR /root
-RUN echo "cat /etc/motd" >> .bashrc
+ENTRYPOINT [ "/appserver-start.sh" ]
+
 CMD [ "/bin/bash" ]
-
-#COPY ./appserver-entrypoint.sh ./start-app-server.sh
-#RUN chmod +x ./start-app-server.sh
-#ENTRYPOINT [ "appserver-entrypoint.sh" ]
-
-#COPY ./tmp/dbaccess.ini /protheus/protheus_data
-#RUN mkdir -p /protheus_files
-#COPY ./tmp/odbc.ini /protheus_files
-#COPY ./tmp/start.sh /protheus_files
-#RUN chmod +x /protheus_files/start.sh
-#WORKDIR /protheus_files/
-
 
 <% if (exposePorts) { -%>
 EXPOSE <%= exposePorts -%>

@@ -13,7 +13,6 @@ ENV ACCEPT_EULA=Y
 ENV SA_PASSWORD=<%= dbPassword %>
 
 RUN apt update -y
-# RUN apt upgrade -y
 
 RUN apt-get -y install \
   curl \
@@ -30,7 +29,9 @@ RUN apt-get -y install \
   libsm6 \
   libice6 \
   libxext6 \
-  libx11-6
+  libx11-6 \
+  vim \
+  coreutils
 
 <%-include('../7zip.dockerfile.txt') %>
 
@@ -93,38 +94,16 @@ RUN /totvs/bin/dbaccess/tools/dbaccesscfg -u <%- dbUser %> -p <%- dbPassword %> 
 ################################################################################
 # Final settings
 ################################################################################
-#ENTRYPOINT [ "./appserver-start.sh" ]
 WORKDIR /root
-RUN echo "export PATH=\$PATH:/opt/mssql-tools/bin" >> .bashrc \
-    && echo "export LD_LIBRARY_PATH=/opt/microsoft/msodbcsql17/lib64:\$LD_LIBRARY_PATH" >> .bashrc \
-    && echo "ln -sf /opt/mssql/lib/libc++.so /opt/mssql/lib/libc++.so.1" >> .bashrc \
-    && echo "ln -sf /opt/mssql/lib/libc++abi.so /opt/mssql/lib/libc++abi.so.1" >> .bashrc \
-    && echo "ln -sf /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.10.so.6.1 /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.x.so" >> .bashrc
+COPY start-sqlserver.sh start-sqlserver.sh
+RUN chmod +x start-sqlserver.sh
 
-# Anexar base de dados
-RUN echo "echo * Anexando base de dados..." >> .bashrc \
-    && echo "sqlcmd -Q \
-        \"use [master] \n \
-        go\n \
-        CREATE DATABASE [Protheus_DB] ON ( FILENAME = N'/totvs/database/P1212410MNTDBEXP.mdf' ), ( FILENAME = N'/totvs/database/P1212410MNTDBEXP_log.ldf' ) FOR ATTACH\n \
-        GO\"\n\n" >> .bashrc
+COPY attach-db.sql attach-db.sql
 
-        USE [P1212410MNTDBEXP]
-GO
-ALTER USER [dbo] WITH NAME=[sa]
-GO
-USE [P1212410MNTDBEXP]
-GO
-ALTER ROLE [db_owner] DROP MEMBER [dbo]
-GO
+COPY /etc/init.d/dbaccess.sh /etc/init.d/dbaccess.sh
+RUN chmod +x /etc/init.d/dbaccess.sh
 
-RUN echo "echo * Base de dados anexada" >> .bashrc \
-
-RUN echo "cat /etc/motd\n" >> .bashrc
-
-RUN echo "alias dbmonitor=/totvs/bin/dbaccess/dbmonitor" >> .bash_aliases \
-    && echo "alias sqlcmd='/opt/mssql-tools/bin/sqlcmd -U sa -P <%= dbPassword %>'" >> .bash_aliases
-##CMD [ "/bin/bash" ]
+cmd /root/start-sqlserver.sh
 
 #RUN source /root/.bashrc
 

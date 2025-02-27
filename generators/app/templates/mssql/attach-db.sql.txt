@@ -1,0 +1,4 @@
+use [master]
+go
+CREATE DATABASE [Protheus_DB] ON ( FILENAME = N'/totvs/database/P1212410MNTDBEXP.mdf' ), ( FILENAME = N'/totvs/database/P1212410MNTDBEXP_log.ldf' ) FOR ATTACH
+GO

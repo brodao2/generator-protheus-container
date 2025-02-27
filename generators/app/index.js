@@ -376,11 +376,11 @@ ${chalk.bold("Let's start!")}
 
   }
 
-  _prepareDbaccess(varList) {
+  _prepareDbaccess(varList, dbContainer) {
 
     this.fs.copyTpl(
       this.templatePath("dbaccess", "dbaccess-daemon.sh.txt"),
-      this.destinationPath("_images", "dbaccess", "etc", "init.d", "dbaccess.sh"),
+      this.destinationPath("_images", dbContainer, "etc", "init.d", "dbaccess.sh"),
       {
         appSequence: "",
         ...varList
@@ -434,9 +434,7 @@ ${chalk.bold("Let's start!")}
 
     this._prepareStartAppServer(secondaries, copyList, varList);
 
-
-
-    this._prepareDbaccess(varList);
+    this._prepareDbaccess(varList, this.props.sgdb); 
 
     varList.copyInternalList = copyList.filter((copyInfo) => copyInfo.internal);
     varList.copyExternalList = copyList.filter((copyInfo) => !copyInfo.internal);
@@ -475,6 +473,20 @@ ${chalk.bold("Let's start!")}
             return value.container === "sgdb";
           })
         },
+        { debug: DEBUG_COPY_TPL }
+      );
+
+      this.fs.copyTpl(
+        this.templatePath("mssql","start-sqlserver.sh.txt"),
+        this.destinationPath("_images","mssql", "start-sqlserver.sh"),
+        varList,
+        { debug: DEBUG_COPY_TPL }
+      );
+
+      this.fs.copyTpl(
+        this.templatePath("mssql","attach-db.sql.txt"),
+        this.destinationPath("_images","mssql", "attach-db.sql"),
+        varList,
         { debug: DEBUG_COPY_TPL }
       );
 
