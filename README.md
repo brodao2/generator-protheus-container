@@ -13,8 +13,7 @@ Container Protheus Generator for Yeoman.
 ```console
 /_images
 .yo-rc.json
-container.bat
-container.sh
+container.[bat|sh]
 ```
 
 ## Requisitos
@@ -31,7 +30,9 @@ npm install -G yo generator-protheus-container
 ```
 
 > Apoio:
-> [Yeoman/Yo](http://yeoman.io/),
+> [Docker](https://www.docker.com/)
+> [Podman](https://podman.io/)
+> [Yeoman/Yo](http://yeoman.io/)
 > [Generator Protheus Container](https://www.npmjs.com/package/generator-protheus-container)
 
 ## Uso
@@ -40,21 +41,48 @@ Para gerar um novo projeto container:
 
 ```console
 mkdir my-protheus-container
-chdir my-protheus-container
+cd my-protheus-container
 yo protheus-container
 ```
 
-Responda ao perguntas efetuadas e inicia criação do container:
+Responda as perguntas e iniciar a criação do container:
 
-```bash
+```console
 container.bat build
 ```
 
 Após a criação do container, pode executá-lo com:
 
-```bash
+```console
 container.bat start
 ```
+
+### dbMonitor
+
+Com o container inicializado, inicie a execução do dbMonitor no ambiente hospedeiro.
+
+![dbMonitor: Tela inicial](./db-monitor-start.png)
+
+Use a porta informada na definição do container. Caso não consiga conexão, verifique a porta pública:
+
+```console
+podman ?????
+```
+### SSMS
+
+Com o container inicializado, inicie a execução do SSMS no ambiente hospedeiro.
+
+![SSMS: tela inicial](./ssms-start.png.png)
+
+Use a porta e senha, informado na definição do container. Caso não consiga conexão, verifique a porta pública:
+
+```console
+podman ?????
+```
+
+> O atributo ``Server Name`` tem o formato: `address server` **`,`** `port number`.
+
+![SSMS: Em execução](ssms-running.png)
 ## Para colaboradores
 
 Faça uma bifurcação (_fork_) do repositório, faça sua implementação. Ao finalizar, faça um _pull request_ com suas alterações e aguarde a incorporação ao projeto original.
