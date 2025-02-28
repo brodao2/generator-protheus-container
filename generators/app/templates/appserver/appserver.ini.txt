@@ -18,7 +18,8 @@ Theme=dark
 
 [DBAccess]
 dataBase=<%-sgdb%>
-server=<%- containerName %>-<%-sgdb%>
+;server=<%- containerName %>-<%- sgdb %>
+server=<%- sgdb %>
 port=<%- dbAccessPort %>
 alias=Protheus_DB
 
@@ -36,7 +37,7 @@ SERVER=<%= licenseServer %>
 PORT=<%= licensePort %>
 
 [General]
-consoleFile=./logs/stand-alone.log
+consoleFile=/totvs/protheus/log/appserver<%= appServerPort %>.log
 consolelog=1
 KillStack=1
 inactiveTimeout=600
@@ -54,4 +55,4 @@ port=<%- webMonitorPort %>
 Enable=0
 
 [WEBAPP]
-port=8089
+;port=8089

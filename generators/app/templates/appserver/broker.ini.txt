@@ -3,7 +3,7 @@ consoleLog=1
 consoleLogDate=0
 logTimeStamp=0
 buildKillUsers=1
-consoleFile=~/logs/broker.log
+consoleFile=/totvs/protheus/log/broker.log
 
 [BALANCE_HTTP]
 LOCAL_SERVER_PORT = <%- protheusPort %>

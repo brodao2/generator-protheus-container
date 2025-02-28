@@ -25,13 +25,14 @@ RUN dnf -y  \
   curl \
   gnupg2 \
   ca-certificates \
-  unixODBC \
-  gcc \
-  gcc-c++ \
-  make \
-  sudo \
-  krb5-devel \
   xz
+  
+#  krb5-devel \
+#  gcc \
+#  gcc-c++ \
+#  make \
+#  unixODBC \
+#  sudo \
 
 <%-include('../7zip.dockerfile.txt') %>
 
@@ -64,16 +65,11 @@ RUN cd <%= decompress.folder %> \
 <% copyInternalList.forEach(function(copyInfo) { %>
 RUN mkdir <%= copyInfo.target %>
 RUN cp -v -r <%= copyInfo.source %>/* <%= copyInfo.target %>/
-#RUN if [ -e "<%= copyInfo.target %>/*.sh" ]; then \
-#  fi
 <% }); %>
 
 # External (host to image )
 <% copyExternalList.forEach(function(copyInfo) { %>
 COPY <%= copyInfo.source %> <%= copyInfo.target %>
-#RUN if [ -e "<%= copyInfo.target %>/*.sh" ]; then \
-#  chmod +x <%= copyInfo.target %>/*.sh \
-#  fi
 <% }); %>
 
 RUN mkdir /etc/init.d/totvs.d
@@ -88,6 +84,8 @@ RUN chmod +x /appserver-start.sh
 ################################################################################
 # Final settings
 ################################################################################
+RUN mkdir /totvs/protheus/log/
+
 ENTRYPOINT [ "/appserver-start.sh" ]
 
 CMD [ "/bin/bash" ]

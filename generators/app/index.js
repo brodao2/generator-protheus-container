@@ -309,14 +309,20 @@ ${chalk.bold("Let's start!")}
       },
       { debug: DEBUG_COPY_TPL }
     );
+    
+    copyList.push({
+      source: `./ini/broker/appserver.ini`,
+      target: `/totvs/bin/protheus/broker/`,
+      internal: false,
+    });
 
-    secondaries.forEach((sequence) => {
+    secondaries.forEach((sequence, index) => {
       this.fs.copyTpl(
         this.templatePath("appserver", "appserver.ini.txt"),
         this.destinationPath("_images", "appserver", "ini", `appserver-${sequence}`, "appserver.ini"),
         {
           sgdb: this.props.sgdb,
-          appServerPort: this.props.protheusPort,
+          appServerPort: this.props.protheusPort + index + 1,
           licenseServer: this.props.licenseServer.split(":")[0],
           licensePort: this.props.licenseServer.split(":")[1],
           webMoniMonitorPort: this.props.webMonitorPort,
@@ -348,13 +354,14 @@ ${chalk.bold("Let's start!")}
         target: `/totvs/bin/protheus/appserver-${sequence}`,
         internal: true,
       });
+      copyList.push({
+        source: `./ini/appserver-${sequence}/appserver.ini`,
+        target: `/totvs/bin/protheus/appserver-${sequence}/`,
+        internal: false,
+      });
+  
     });
 
-    copyList.push({
-      source: "./ini/",
-      target: `/totvs/bin/protheus/`,
-      internal: false,
-    });
   }
 
   _prepareStandAlone(copyList, varList) {
@@ -418,9 +425,9 @@ ${chalk.bold("Let's start!")}
     varList.dbPassword = this.props.dbPassword;
     varList.licenseServer = this.props.licenseServer;
     varList.exposePorts = [
-      this.props.webappPort,
+      // This.props.webappPort,
       this.props.protheusPort,
-      this.props.dbAccessPort,
+      // This.props.dbAccessPort,
     ].sort((a, b) => a < b ? -1 : 0).join(" ");
     varList.protheusPort = this.props.protheusPort;
 
