@@ -108,7 +108,8 @@ COPY attach-db.sql attach-db.sql
 COPY /etc/init.d/dbaccess.sh /etc/init.d/dbaccess.sh
 RUN chmod +x /etc/init.d/dbaccess.sh
 
-cmd /root/start-sqlserver.sh
+ENTRYPOINT [ "/root/start-sqlserver.sh" ]
+
+CMD [ "/bin/bash" ]
 
 EXPOSE 7890
-
