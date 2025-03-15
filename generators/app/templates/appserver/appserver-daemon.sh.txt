@@ -12,12 +12,12 @@
 # operações comuns de serviço de maneira fácil e eficiente.
 
 #########################################
-#   CONFIGURACAO DO SERVICO
+#   CONFIGURAÇÃO DO SERVIÇO
 #########################################
-#Inserir o nome do executavel
+#Inserir o nome do executável
 prog="appsrvlinux"
 
-#Inserir o caminho do diretorio do executavel
+#Inserir o caminho do diretório do executável
 pathbin="/totvs/bin/protheus/appserver<%- appSequence %>"
 
 alias=$(basename "${pathbin}")
@@ -88,8 +88,8 @@ export LD_LIBRARY_PATH=${pathbin}
 start_service() {
 
   if [ -z $(pidof -x $progbin) ]; then
-    echo "Starting $prog... "
-    ${progbin} -daemon >/dev/null &
+    echo "Starting ${progbin} -d ... "
+    ${progbin} -d  &
     RETVAL=$?
     if [ ${RETVAL} -eq 0 ]; then
       touch ${lockfile}

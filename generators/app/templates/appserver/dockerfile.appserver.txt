@@ -63,7 +63,7 @@ RUN cd <%= decompress.folder %> \
 ################################################################################
 # Internal (image to image )
 <% copyInternalList.forEach(function(copyInfo) { %>
-RUN mkdir <%= copyInfo.target %>
+RUN mkdir -p <%= copyInfo.target %>
 RUN cp -v -r <%= copyInfo.source %>/* <%= copyInfo.target %>/
 <% }); %>
 
@@ -72,19 +72,22 @@ RUN cp -v -r <%= copyInfo.source %>/* <%= copyInfo.target %>/
 COPY <%= copyInfo.source %> <%= copyInfo.target %>
 <% }); %>
 
-RUN mkdir /etc/init.d/totvs.d
+RUN mkdir -p /etc/init.d/totvs.d
 COPY etc/init.d/* /etc/init.d/totvs.d/
 RUN chmod +x /etc/init.d/totvs.d/*.sh
 
 COPY appserver-start.sh /appserver-start.sh
 RUN chmod +x /appserver-start.sh
 
+COPY appserver-stop.sh /appserver-stop.sh
+RUN chmod +x /appserver-stop.sh
+
 <%- include('../dockerfile.tail.txt', { appVersion: appVersion }) %>
 
 ################################################################################
 # Final settings
 ################################################################################
-RUN mkdir /totvs/protheus/log/
+RUN mkdir -p /totvs/log/
 
 ENTRYPOINT [ "/appserver-start.sh" ]
 

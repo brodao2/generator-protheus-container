@@ -3,10 +3,10 @@ consoleLog=1
 consoleLogDate=0
 logTimeStamp=0
 buildKillUsers=1
-consoleFile=/totvs/protheus/log/broker.log
+consoleFile=/totvs/log/broker.log
 
 [BALANCE_HTTP]
-LOCAL_SERVER_PORT = <%- protheusPort %>
+LOCAL_SERVER_PORT=<%- protheusPort %>
 USING_WEBMONITOR=1
 
 <% secondaries.forEach((secondary) => { %>

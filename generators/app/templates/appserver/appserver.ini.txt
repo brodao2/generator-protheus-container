@@ -1,7 +1,7 @@
 [environment]
-RPOCUSTOM=../rpo/custom.rpo
-sourcepath=../rpo
-rootpath=../protheus_data
+RPOCUSTOM=/totvs/rpo/custom.rpo
+sourcepath=/totvs/rpo
+rootpath=/totvs/protheus_data
 StartSysInDb=1
 TopMemoMega=1
 dateformat=default
@@ -37,7 +37,7 @@ SERVER=<%= licenseServer %>
 PORT=<%= licensePort %>
 
 [General]
-consoleFile=/totvs/protheus/log/appserver<%= appServerPort %>.log
+consoleFile=/totvs/log/appserver<%= appServerPort %>.log
 consolelog=1
 KillStack=1
 inactiveTimeout=600
@@ -47,7 +47,7 @@ BuildKillUsers=1
 CanRunJobs=1
 
 [WEBMONITOR]
-Enable=1
+Enable=0
 Debug=1
 port=<%- webMonitorPort %>
 
@@ -55,4 +55,4 @@ port=<%- webMonitorPort %>
 Enable=0
 
 [WEBAPP]
-;port=8089
+port=<%- webAppPort %>

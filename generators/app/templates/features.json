@@ -7,7 +7,7 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/appserver/panthera_onca/{os}/{arch}/builds/{version}/appserver.tar.gz",
-        "targetFolder": "/totvs/bin/protheus/appserver"
+        "targetFolder": "totvs/bin/protheus/appserver"
       }
     ]
   },
@@ -20,7 +20,7 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/appserver/harpia/{os}/{arch}/builds/{version}/appserver.tar.gz",
-        "targetFolder": "/totvs/bin/protheus/appserver"
+        "targetFolder": "totvs/bin/protheus/appserver"
       }
     ]
   },
@@ -32,7 +32,7 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/dbaccess/{os}/{arch}/builds/{version}/dbaccess.tar.gz",
-        "targetFolder": "/totvs/bin/dbaccess",
+        "targetFolder": "totvs/bin/dbaccess",
         "container": "sgdb"
       }
     ]
@@ -45,7 +45,7 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/smartclientwebapp/panthera_onca/{os}/{arch}/builds/{version}/smartclientwebapp.tar.gz",
-        "targetFolder": "/totvs/bin/protheus/appserver"
+        "targetFolder": "totvs/bin/protheus/appserver"
       }
     ]
   },
@@ -57,7 +57,7 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/tec/smartclientwebapp/harpia/{os}/{arch}/builds/{version}/smartclientwebapp.tar.gz",
-        "targetFolder": "/totvs/bin/protheus"
+        "targetFolder": "totvs/bin/protheus/appserver"
       }
     ]
   },
@@ -69,11 +69,11 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/protheus/padrao/builds/{version}/published/repositorio/panthera_onca/tttm120.rpo",
-        "targetFolder": "/totvs/protheus/apo"
+        "targetFolder": "/totvs/apo"
       },
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/engenharia/base_congelada/protheus/bra/{version}/mnt_com_dic/latest/protheus_data.zip",
-        "targetFolder": "/totvs/protheus/protheus_data"
+        "targetFolder": "/totvs/protheus_data"
       },
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/engenharia/base_congelada/protheus/bra/{version}/exp_com_dic/latest/{sgdb}.zip",
@@ -94,7 +94,7 @@
       },
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/engenharia/base_congelada/protheus/bra/{version}/mnt_com_dic/latest/protheus_data.zip",
-        "targetFolder": "/totvs/protheus/protheus_data"
+        "targetFolder": "/totvs/protheus_data"
       },
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/engenharia/base_congelada/protheus/bra/{version}/exp_com_dic/latest/{sgdb}.zip",

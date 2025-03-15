@@ -5,10 +5,10 @@
 # =======================================================
 
 #########################################
-#   CONFIGURACAO DO SERVICO
+#   CONFIGURAÇÃO DO SERVIÇO
 #########################################
-#Inserir o nome do executavel
-prog="appsrvlinux_broker"
+#Inserir o nome do executável
+prog="appsrvlinux"
 
 ## Configuração do tipo de balance:
     # broker_type="balance_smart_client_desktop"
@@ -18,8 +18,8 @@ prog="appsrvlinux_broker"
 
 broker_type="balance_http"
 
-#Inserir o caminho do diretorio do executavel
-pathbin="/totvs/protheus/bin/protheus_broker"
+#Inserir o caminho do diretório do executável
+pathbin="/totvs/bin/protheus/broker"
 
 alias=$(basename "${pathbin}")
 
@@ -85,8 +85,8 @@ export LD_LIBRARY_PATH=${pathbin}
 start_service() {
 
 if [ -z `pidof -x $progbin` ] ; then
-   echo "Starting $prog... "
-   ${progbin} -daemon -${broker_type} -a >/dev/null &
+   echo "Starting ${progbin} -d -${broker_type}... "
+   ${progbin} -d -${broker_type} &
    RETVAL=$?
    if [ ${RETVAL} -eq 0 ]; then
       touch ${lockfile}

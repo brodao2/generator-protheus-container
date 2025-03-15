@@ -90,6 +90,7 @@ ${chalk.bold("Let's start!")}
     this.log(chalk.bold(chalk.red("Não utilize em ambiente de produção.")));
 
     answers = await this.prompt(config.prompts.initial());
+// Appsrvlinux não acha o ini
 
     if (answers.selectOption === "fully-featured") {
       answers.features = ["protheus-onca-latest", "dbaccess-latest", "webapp-onca-latest"];
@@ -232,11 +233,15 @@ ${chalk.bold("Let's start!")}
       { debug: DEBUG_COPY_TPL }
     );
 
-    // CopyList.push({
-    //    source: "./etc/init.d",
-    //    target: "/etc/init.d/totvs.d",
-    //    internal: false,
-    //  });
+    this.fs.copyTpl(
+      this.templatePath("appserver", "appserver-stop.sh.txt"),
+      this.destinationPath("_images", "appserver", "appserver-stop.sh"),
+      {
+        secondaries: secondaries,
+        ...varList
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
 
   }
 
@@ -287,7 +292,7 @@ ${chalk.bold("Let's start!")}
 
     this.fs.copyTpl(
       this.templatePath("appserver", "appserver-broker.sh.txt"),
-      this.destinationPath("_images", "appserver", "etc", "init.d", "appserver.sh"),
+      this.destinationPath("_images", "appserver", "etc", "init.d", "totvs.d", "appserver.sh"),
       {
         appSequence: "",
         ...varList
@@ -297,7 +302,7 @@ ${chalk.bold("Let's start!")}
 
     this.fs.copyTpl(
       this.templatePath("appserver", "broker.ini.txt"),
-      this.destinationPath("_images", "appserver", "ini", "broker", "appserver.ini"),
+      this.destinationPath("_images", "appserver", "ini", "broker", "appsrvlinux.ini"),
       {
         protheusPort: this.props.protheusPort,
         secondaries: secondaries.map((sequence, index) => {
@@ -309,9 +314,9 @@ ${chalk.bold("Let's start!")}
       },
       { debug: DEBUG_COPY_TPL }
     );
-    
+
     copyList.push({
-      source: `./ini/broker/appserver.ini`,
+      source: `./ini/broker/appsrvlinux.ini`,
       target: `/totvs/bin/protheus/broker/`,
       internal: false,
     });
@@ -319,22 +324,16 @@ ${chalk.bold("Let's start!")}
     secondaries.forEach((sequence, index) => {
       this.fs.copyTpl(
         this.templatePath("appserver", "appserver.ini.txt"),
-        this.destinationPath("_images", "appserver", "ini", `appserver-${sequence}`, "appserver.ini"),
+        this.destinationPath("_images", "appserver", "ini", `appserver-${sequence}`, "appsrvlinux.ini"),
         {
           sgdb: this.props.sgdb,
           appServerPort: this.props.protheusPort + index + 1,
           licenseServer: this.props.licenseServer.split(":")[0],
           licensePort: this.props.licenseServer.split(":")[1],
-          webMoniMonitorPort: this.props.webMonitorPort,
           containerName: this.props.containerName,
           dbAccessPort: this.props.dbAccessPort,
           webMonitorPort: this.props.webMonitorPort,
-          secondaries: secondaries.map((sequence, index) => {
-            return {
-              sequence: `0${sequence}`,
-              port: this.props.protheusPort + index + 1,
-            }
-          })
+          webAppPort: this.props.webAppPort + index + 1,
         },
         { debug: DEBUG_COPY_TPL }
       );
@@ -355,11 +354,11 @@ ${chalk.bold("Let's start!")}
         internal: true,
       });
       copyList.push({
-        source: `./ini/appserver-${sequence}/appserver.ini`,
+        source: `./ini/appserver-${sequence}/appsrvlinux.ini`,
         target: `/totvs/bin/protheus/appserver-${sequence}/`,
         internal: false,
       });
-  
+
     });
 
   }
@@ -441,7 +440,7 @@ ${chalk.bold("Let's start!")}
 
     this._prepareStartAppServer(secondaries, copyList, varList);
 
-    this._prepareDbaccess(varList, this.props.sgdb); 
+    this._prepareDbaccess(varList, this.props.sgdb);
 
     varList.copyInternalList = copyList.filter((copyInfo) => copyInfo.internal);
     varList.copyExternalList = copyList.filter((copyInfo) => !copyInfo.internal);
