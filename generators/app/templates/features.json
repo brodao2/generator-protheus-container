@@ -69,7 +69,7 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/protheus/padrao/builds/{version}/published/repositorio/panthera_onca/tttm120.rpo",
-        "targetFolder": "/totvs/apo"
+        "targetFolder": "/totvs/rpo"
       },
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/engenharia/base_congelada/protheus/bra/{version}/mnt_com_dic/latest/protheus_data.zip",
@@ -90,7 +90,7 @@
     "urls": [
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/protheus/padrao/builds/{version}/published/repositorio/panthera_onca/tttm120.rpo",
-        "targetFolder": "/totvs/apo"
+        "targetFolder": "/totvs/rpo"
       },
       {
         "source": "https://{credencial}arte.engpro.totvs.com.br/engenharia/base_congelada/protheus/bra/{version}/mnt_com_dic/latest/protheus_data.zip",

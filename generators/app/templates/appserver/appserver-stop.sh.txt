@@ -6,10 +6,10 @@
 # =======================================================
 
 <% for (var i = 0; i < secondaries.length; i++) { %>
-/etc/init.d/totvs.d/appserver-<%- i+1 %>.sh start
+/etc/init.d/totvs.d/appserver-<%- i+1 %>.sh stop
 <% } %>
 
-/etc/init.d/totvs.d/appserver.sh start
+/etc/init.d/totvs.d/appserver.sh stop
 
 cat /etc/motd
 

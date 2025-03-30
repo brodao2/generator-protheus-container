@@ -77,7 +77,7 @@ ulimit -v ${virtualMemory}
 ## Acessa o diretorio configurado e define caminho de busca de libs
 #################################################################
 cd $pathbin
-export LD_LIBRARY_PATH=${pathbin}
+export LD_LIBRARY_PATH=${pathbin}:LD_LIBRARY_PATH
 
 #################################################################
 ## Start_service: inicia o serviço

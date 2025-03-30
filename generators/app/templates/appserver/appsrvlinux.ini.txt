@@ -2,7 +2,7 @@
 RPOCUSTOM=/totvs/rpo/custom.rpo
 rootpath=/totvs/protheus_data
 sourcepath=/totvs/rpo
-SpecialKey=P12.1.33
+;SpecialKey=P12.1.33
 StartSysInDb=1
 DBAlias=P1212410MNTDB
 TopMemoMega=1
@@ -20,8 +20,8 @@ Theme=dark
 
 [DBAccess]
 dataBase=<%-sgdb%>
-;server=<%- containerName %>-<%- sgdb %>
-server=<%- sgdb %>
+server=<%- containerName %>-<%- sgdb %>
+;server=<%- sgdb %>
 port=<%- dbAccessPort %>
 
 [drivers]

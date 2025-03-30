@@ -320,6 +320,12 @@ ${chalk.bold("Let's start!")}
       internal: false,
     });
 
+    copyList.push({
+      source: `./ini/broker/appsrvlinux.ini`,
+      target: `/totvs/bin/protheus/broker/appserver.ini`,
+      internal: false,
+    });
+
     secondaries.forEach((sequence, index) => {
       this.fs.copyTpl(
         this.templatePath("appserver", "appsrvlinux.ini.txt"),
@@ -332,7 +338,7 @@ ${chalk.bold("Let's start!")}
           containerName: this.props.containerName,
           dbAccessPort: this.props.dbAccessPort,
           webMonitorPort: this.props.webMonitorPort,
-          webAppPort: this.props.webAppPort + index + 1,
+          webAppPort: this.props.webappPort + index + 1,
         },
         { debug: DEBUG_COPY_TPL }
       );
@@ -357,6 +363,11 @@ ${chalk.bold("Let's start!")}
         target: `/totvs/bin/protheus/appserver-${sequence}/`,
         internal: false,
       });
+      copyList.push({
+        source: `./ini/appserver-${sequence}/appsrvlinux.ini`,
+        target: `/totvs/bin/protheus/appserver-${sequence}/appserver.ini`,
+        internal: false,
+      });
 
     });
 
@@ -374,7 +385,7 @@ ${chalk.bold("Let's start!")}
         containerName: this.props.containerName,
         dbAccessPort: this.props.dbAccessPort,
         webMonitorPort: this.props.webMonitorPort,
-        webAppPort: this.props.webAppPort,
+        webAppPort: this.props.webappPort,
       },
       { debug: DEBUG_COPY_TPL }
     );
@@ -382,6 +393,12 @@ ${chalk.bold("Let's start!")}
     copyList.push({
       source: `./ini/appserver/appsrvlinux.ini`,
       target: `/totvs/bin/protheus/appserver/`,
+      internal: false,
+    });
+
+    copyList.push({
+      source: `./ini/appserver/appsrvlinux.ini`,
+      target: `/totvs/bin/protheus/appserver/appserver.ini`,
       internal: false,
     });
 
@@ -421,8 +438,11 @@ ${chalk.bold("Let's start!")}
     const outputFile = (this.props.containerManager === "podman") ?
       "Containerfile" : "Dockerfile";
     let secondaries = [];
-    for (let index = 0; index < this.props.brokerSecondary; index++) {
-      secondaries.push(index + 1);
+
+    if (this.props.brokerEnabled) {
+      for (let index = 0; index < this.props.brokerSecondary; index++) {
+        secondaries.push(index + 1);
+      }
     }
 
     this.props.features.forEach(feature => {

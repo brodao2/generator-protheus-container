@@ -80,7 +80,7 @@ ulimit -v ${virtualMemory}
 ## Acessa o diretorio configurado e define caminho de busca de libs
 #################################################################
 cd $pathbin
-export LD_LIBRARY_PATH=${pathbin}
+export LD_LIBRARY_PATH=${pathbin}:LD_LIBRARY_PATH
 
 #################################################################
 ## Start_service: inicia o serviço
@@ -88,8 +88,8 @@ export LD_LIBRARY_PATH=${pathbin}
 start_service() {
 
   if [ -z $(pidof -x $progbin) ]; then
-    echo "Starting ${progbin} -d ... "
-    ${progbin} -d  &
+    echo "Starting ${progbin} daemon ... "
+    ${progbin} daemon  &
     RETVAL=$?
     if [ ${RETVAL} -eq 0 ]; then
       touch ${lockfile}

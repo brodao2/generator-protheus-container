@@ -15,7 +15,8 @@ LABEL author="Protheus Generator <%- appVersion %>"
 # Prepare environment
 ################################################################################
 USER root
-ENV LD_LIBRARY_PATH=/protheus/appserver
+
+ENV export LD_LIBRARY_PATH=/totvs/bin/protheus/appserver:/totvs/bin/protheus/broker:$LD_LIBRARY_PATH
 RUN ulimit -n 32000
 ENV ACCEPT_EULA=Y
 
@@ -26,7 +27,7 @@ RUN dnf -y  \
   gnupg2 \
   ca-certificates \
   xz
-  
+
 #  krb5-devel \
 #  gcc \
 #  gcc-c++ \

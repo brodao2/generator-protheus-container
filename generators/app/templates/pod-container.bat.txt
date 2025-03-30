@@ -6,6 +6,7 @@ if "%1" == "build" set title=BUILD
 if "%1" == "rebuild" set title=REBUILD
 if "%1" == "start" set title=START
 if "%1" == "stop" set title=STOP
+if "%1" == "ports" set title=PORTS
 
 <%= include("banner.bat.txt", { appVersion: appVersion, title: "%title%" }) %>
 
@@ -14,6 +15,7 @@ if "%1" == "rebuild" goto :rebuild
 if "%1" == "start" goto :start
 if "%1" == "stop" goto :stop
 if "%1" == "help" goto :help
+if "%1" == "ports" goto :ports
 
 echo ERROR: Invalid command
 goto :help
@@ -35,9 +37,9 @@ if %errorlevel% NEQ 0 goto :buildError
 
 podman pod create <%- containerName %>-pod
 if %errorlevel% NEQ 0 goto :buildError
-podman run -it --pod <%- containerName %>-pod --name mssql -d "<%- containerName %>-mssql"
+podman run -it --pod <%- containerName %>-pod --name <%- containerName %>-mssql -d "<%- containerName %>-mssql"
 if %errorlevel% NEQ 0 goto :buildError
-podman run -it --pod <%- containerName %>-pod --name appserver -d "<%- containerName %>-appserver" /bin/sh
+podman run -it --pod <%- containerName %>-pod --name <%- containerName %>-appserver -d "<%- containerName %>-appserver" /bin/sh
 if %errorlevel% NEQ 0 goto :buildError
 podman pod stop <%- containerName %>-pod
 if %errorlevel% NEQ 0 goto :buildError
@@ -48,11 +50,17 @@ goto :end
 podman pod start <%- containerName %>-pod
 if %errorlevel% NEQ 0 goto :startError
 
-goto :end
+goto :ports
 
 :stop
 podman pod stop <%- containerName %>-pod
 if %errorlevel% NEQ 0 goto :stopError
+
+goto :end
+
+:ports
+podman ps --format "{{.ID}} {{.Names}} {{.Ports}}"
+if %errorlevel% NEQ 0 goto :portsError
 
 goto :end
 
@@ -75,6 +83,10 @@ goto :help
 
 :stopError
 <%= include("error.bat.txt", { message: "Error during container stopping" }) %>
+pause
+
+:portsError
+<%= include("error.bat.txt", { message: "No container running." }) %>
 pause
 
 goto :help
