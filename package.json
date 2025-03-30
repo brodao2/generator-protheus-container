@@ -91,6 +91,10 @@
     "debug": "npx --node-options=\"--inspect\" yo protheus-container",
     "--TEST--": "",
     "pretest": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "--MISC--": "",
+    "_comment": "não esta funcionando. execute o script direto",
+    "start-local-services": "powershell -Command \"Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ./scripts/start-local-services.ps1'\"",
+    "stop-local-services": "powershell -Command \"Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File ./scripts/stop-local-services.ps1'\""
   }
 }

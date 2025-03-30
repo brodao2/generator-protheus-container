@@ -94,10 +94,10 @@ module.exports = {
         {
           type: "number",
           name: "brokerSecondary",
-          message: "How many secondary servers? (1 to 5)",
+          message: "How many secondary servers? (1 to 5",
           default: 3,
           validate: value => {
-            return value > 0 && value < 6;
+            return value > 0 && value < 51;
           },
           store: true
         }

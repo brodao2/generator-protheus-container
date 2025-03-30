@@ -90,7 +90,6 @@ ${chalk.bold("Let's start!")}
     this.log(chalk.bold(chalk.red("Não utilize em ambiente de produção.")));
 
     answers = await this.prompt(config.prompts.initial());
-// Appsrvlinux não acha o ini
 
     if (answers.selectOption === "fully-featured") {
       answers.features = ["protheus-onca-latest", "dbaccess-latest", "webapp-onca-latest"];
@@ -323,8 +322,8 @@ ${chalk.bold("Let's start!")}
 
     secondaries.forEach((sequence, index) => {
       this.fs.copyTpl(
-        this.templatePath("appserver", "appserver.ini.txt"),
-        this.destinationPath("_images", "appserver", "ini", `appserver-${sequence}`, "appsrvlinux.ini"),
+        this.templatePath("appserver", "appsrvlinux.ini.txt"),
+        this.destinationPath("_images", "appserver", "ini", `secondary-${sequence}`, "appsrvlinux.ini"), // "appsrvlinux.ini"
         {
           sgdb: this.props.sgdb,
           appServerPort: this.props.protheusPort + index + 1,
@@ -364,9 +363,25 @@ ${chalk.bold("Let's start!")}
   }
 
   _prepareStandAlone(copyList, varList) {
+    this.fs.copyTpl(
+      this.templatePath("appserver", "appsrvlinux.ini.txt"),
+      this.destinationPath("_images", "appserver", "ini", `appserver`, "appsrvlinux.ini"), // "appsrvlinux.ini"
+      {
+        sgdb: this.props.sgdb,
+        appServerPort: this.props.protheusPort,
+        licenseServer: this.props.licenseServer.split(":")[0],
+        licensePort: this.props.licenseServer.split(":")[1],
+        containerName: this.props.containerName,
+        dbAccessPort: this.props.dbAccessPort,
+        webMonitorPort: this.props.webMonitorPort,
+        webAppPort: this.props.webAppPort,
+      },
+      { debug: DEBUG_COPY_TPL }
+    );
+
     copyList.push({
-      source: "./ini/",
-      target: `/totvs/bin/protheus/`,
+      source: `./ini/appserver/appsrvlinux.ini`,
+      target: `/totvs/bin/protheus/appserver/`,
       internal: false,
     });
 
@@ -423,11 +438,15 @@ ${chalk.bold("Let's start!")}
     varList.dbUser = this.props.dbUser;
     varList.dbPassword = this.props.dbPassword;
     varList.licenseServer = this.props.licenseServer;
-    varList.exposePorts = [
-      // This.props.webappPort,
+    let exposePorts = [
       this.props.protheusPort,
       // This.props.dbAccessPort,
-    ].sort((a, b) => a < b ? -1 : 0).join(" ");
+    ];
+    if (!this.props.brokerEnabled) {
+      exposePorts.push(this.props.webappPort);
+    }
+
+    varList.exposePorts = exposePorts.sort((a, b) => a < b ? -1 : 0).join(" ");
     varList.protheusPort = this.props.protheusPort;
 
     this._prepareDownloadList(downloadList, tarList, zipList);
@@ -483,15 +502,15 @@ ${chalk.bold("Let's start!")}
       );
 
       this.fs.copyTpl(
-        this.templatePath("mssql","start-sqlserver.sh.txt"),
-        this.destinationPath("_images","mssql", "start-sqlserver.sh"),
+        this.templatePath("mssql", "start-sqlserver.sh.txt"),
+        this.destinationPath("_images", "mssql", "start-sqlserver.sh"),
         varList,
         { debug: DEBUG_COPY_TPL }
       );
 
       this.fs.copyTpl(
-        this.templatePath("mssql","attach-db.sql.txt"),
-        this.destinationPath("_images","mssql", "attach-db.sql"),
+        this.templatePath("mssql", "attach-db.sql.txt"),
+        this.destinationPath("_images", "mssql", "attach-db.sql"),
         varList,
         { debug: DEBUG_COPY_TPL }
       );

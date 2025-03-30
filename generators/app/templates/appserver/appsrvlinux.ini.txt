@@ -1,8 +1,10 @@
 [environment]
 RPOCUSTOM=/totvs/rpo/custom.rpo
-sourcepath=/totvs/rpo
 rootpath=/totvs/protheus_data
+sourcepath=/totvs/rpo
+SpecialKey=P12.1.33
 StartSysInDb=1
+DBAlias=P1212410MNTDB
 TopMemoMega=1
 dateformat=default
 localdbextension=.dtc
@@ -11,7 +13,7 @@ pictformat=default
 rpodb=top
 rpolanguage=multi
 rpoversion=120
-startpath=\system\
+startpath=/system/
 x2_path=
 ;DARK=1
 Theme=dark
@@ -21,7 +23,6 @@ dataBase=<%-sgdb%>
 ;server=<%- containerName %>-<%- sgdb %>
 server=<%- sgdb %>
 port=<%- dbAccessPort %>
-alias=Protheus_DB
 
 [drivers]
 active=tcp
